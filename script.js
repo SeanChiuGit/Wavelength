@@ -2,13 +2,13 @@
 // 🔧 Firebase 初始化
 // -------------------------
 const firebaseConfig = {
-  apiKey: "AIzaSyAcXDaA7b6xA4wyXEUZjoKTtUtB6_cD80U",
-  authDomain: "wavelength-remote.firebaseapp.com",
-  databaseURL: "https://wavelength-remote-default-rtdb.firebaseio.com",
-  projectId: "wavelength-remote",
-  storageBucket: "wavelength-remote.firebasestorage.app",
-  messagingSenderId: "635005582938",
-  appId: "1:635005582938:web:116ddd29a87817bc46a263"
+  apiKey: "AIzaSyC2FBVzS2LP-cX_lpMrBX_3xSikz9u-YYI",
+  authDomain: "wavelength-58ccd.firebaseapp.com",
+  databaseURL: "https://wavelength-58ccd-default-rtdb.firebaseio.com",
+  projectId: "wavelength-58ccd",
+  storageBucket: "wavelength-58ccd.firebasestorage.app",
+  messagingSenderId: "942333085121",
+  appId: "1:942333085121:web:2d21b3c00a14f5b5941b40"
 };
 
 firebase.initializeApp(firebaseConfig);
