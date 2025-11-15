@@ -51,19 +51,20 @@
     </div>
 
     <!-- ⏰ 时间设置面板 -->
-    <div id="time-settings" style="margin: 20px auto; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; max-width: 400px;">
+    <div id="time-settings"
+      style="display: none; margin: 20px auto; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; max-width: 400px;">
       <h3 style="margin: 0 0 10px 0; font-size: 16px;">⚙️ 时间设置</h3>
       <div style="display: flex; flex-direction: column; gap: 10px;">
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <label for="hintTime" style="flex: 1;">出题时间：</label>
-          <input type="range" id="hintTime" min="10" max="60" value="30" step="5"
-                 style="flex: 2; margin: 0 10px;" oninput="updateTimeDisplay('hint')">
+          <input type="range" id="hintTime" min="10" max="80" value="30" step="5" style="flex: 2; margin: 0 10px;"
+            oninput="updateTimeDisplay('hint')">
           <span id="hintTimeDisplay" style="min-width: 50px; text-align: right;">30秒</span>
         </div>
         <div style="display: flex; align-items: center; justify-content: space-between;">
           <label for="guessTime" style="flex: 1;">猜测时间：</label>
-          <input type="range" id="guessTime" min="10" max="60" value="15" step="5"
-                 style="flex: 2; margin: 0 10px;" oninput="updateTimeDisplay('guess')">
+          <input type="range" id="guessTime" min="10" max="80" value="15" step="5" style="flex: 2; margin: 0 10px;"
+            oninput="updateTimeDisplay('guess')">
           <span id="guessTimeDisplay" style="min-width: 50px; text-align: right;">15秒</span>
         </div>
       </div>
@@ -72,29 +73,30 @@
 
 
     <div class="dimension">
-      <span id="left-label"><img src="assets/loading.gif" alt="加载中"></span>
+      <span id="left-label">加载中...</span>
       <canvas id="arcCanvas" width="400" height="250"></canvas>
-      <span id="right-label"><img src="assets/loading.gif" alt="加载中"></span>
+      <span id="right-label">加载中...</span>
     </div>
-    
-    
+
+
 
     <p id="game-step">等待开始游戏...</p>
 
     <!-- ✅ 房主开始游戏按钮 -->
-    <button id="startGameBtn" onclick="hostStartGame()" style="display:none;">🚀 开始游戏</button>
+    <button id="startGameBtn" class="button-9" role="button" onclick="hostStartGame()" style="display:none;">🚀
+      开始游戏</button>
 
     <!-- ✅ 输入提示词区域（当前出题方） -->
     <div id="hint-input" style="display:none;">
       <input type="text" id="hintBox" placeholder="输入提示词">
-      <button onclick="confirmHint()">确认提示</button>
+      <button class="button-9" role="button" onclick="confirmHint()">确认提示</button>
     </div>
 
     <!-- ✅ 猜测区域（当前猜测方） -->
     <div id="guess-section" style="display:none;">
       <p>提示词：<span id="hint">（等待提示）</span></p>
       <input type="range" id="guessSlider" min="0" max="100" value="50">
-      <button onclick="submitGuess()">提交猜测</button>
+      <button class="button-9" role="button" onclick="submitGuess()">👍🏿 提交</button>
     </div>
 
     <!-- 倒计时 -->
@@ -103,7 +105,7 @@
     <p id="result"></p>
 
     <!-- ✅ 下一轮按钮：开始新一轮并切换角色 -->
-    <button id="nextRoundBtn" onclick="nextRound()" style="display:none;">🔁 下一轮</button>
+    <button id="nextRoundBtn" class="button-9" role="button" onclick="nextRound()" style="display:none;">🔁 下一轮</button>
   </div>
 
   <!-- ✅ 🎊 庆祝音效 -->

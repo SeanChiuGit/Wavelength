@@ -31,16 +31,31 @@ input {
 	line-height: 1.15;
 	margin: 0px 0 0;
 	outline: none;
-	overflow: hidden;
+	overflow: visible;
 	position: relative;
 	text-align: center;
 	text-transform: none;
 	transform: translateZ(0);
-	transition: all 0.2s, box-shadow 0.08s ease-in;
+	transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
 	user-select: none;
 	-webkit-user-select: none;
 	touch-action: manipulation;
 	width: 5.5rem;
+}
+
+.button-9::after {
+	content: "";
+	border-radius: 6px;
+	position: absolute;
+	z-index: -1;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	box-shadow: rgba(50, 50, 93, 0.15) 0 4px 10px 0,
+		rgba(0, 0, 0, 0.1) 0 2px 4px 0, 0 0 15px rgba(74, 100, 247, 0.3);
+	opacity: 0;
+	transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .button-9:disabled {
@@ -51,6 +66,70 @@ input {
 	box-shadow: rgba(50, 50, 93, 0.1) 0 0 0 1px inset,
 		rgba(50, 50, 93, 0.2) 0 6px 15px 0, rgba(0, 0, 0, 0.1) 0 2px 2px 0,
 		rgba(50, 151, 211, 0.3) 0 0 0 4px;
+}
+
+/* 🎨 创建/加入按钮样式优化 */
+#create,
+#join {
+	overflow: visible !important;
+}
+
+#create::after,
+#join::after {
+	box-shadow: rgba(50, 50, 93, 0.15) 0 4px 10px 0,
+		rgba(0, 0, 0, 0.1) 0 2px 4px 0, 0 0 15px rgba(74, 100, 247, 0.3) !important;
+}
+
+/* 🎨 创建/加入按钮 hover 效果 */
+#create:hover,
+#join:hover {
+	transform: translateY(-1px) scale(1.02) !important;
+	background-color: #3a54e7 !important;
+}
+
+#create:hover::after,
+#join:hover::after {
+	opacity: 1 !important;
+}
+
+/* 🎮 游戏内按钮 ::after 伪元素 */
+#hint-input button::after,
+#guess-section button::after,
+#startGameBtn::after {
+	border-radius: 8px !important;
+	box-shadow: 0 6px 20px rgba(74, 100, 247, 0.5),
+		0 3px 10px rgba(74, 100, 247, 0.3), 0 0 20px rgba(74, 100, 247, 0.4) !important;
+}
+
+/* 🎮 游戏内按钮 hover 效果 */
+#hint-input button:hover,
+#guess-section button:hover,
+#startGameBtn:hover {
+	transform: translateY(-2px) scale(1.05) !important;
+	background-color: #3a54e7 !important;
+}
+
+#hint-input button:hover::after,
+#guess-section button:hover::after,
+#startGameBtn:hover::after {
+	opacity: 1 !important;
+}
+
+/* 🔁 下一轮按钮 ::after 伪元素 */
+#nextRoundBtn::after {
+	border-radius: 8px !important;
+	box-shadow: 0 6px 20px rgba(255, 111, 0, 0.5),
+		0 3px 10px rgba(255, 153, 102, 0.3), 0 0 20px rgba(255, 111, 0, 0.4) !important;
+}
+
+/* 🔁 下一轮按钮特殊 hover 效果 */
+#nextRoundBtn:hover {
+	transform: translateY(-2px) scale(1.05) rotate(20deg) !important;
+	background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%) !important;
+}
+
+#nextRoundBtn:hover::after {
+	opacity: 1 !important;
 }
 
 body {
@@ -117,8 +196,9 @@ canvas {
 }
 
 #guessSlider {
-	width: 80%;
+	width: 75%;
 	margin-top: 20px;
+	margin-right: 13px;
 }
 
 #control-panel {
@@ -188,6 +268,12 @@ canvas {
 #connection-status {
 	display: block;
 	font-size: 14px;
+}
+
+#game-step {
+	font-style: italic;
+	margin-top: 30px;
+	margin-bottom: 20px;
 }
 
 /* 底部规则区域 */
@@ -280,4 +366,145 @@ canvas {
 	color: #4a64f7;
 	font-weight: 600;
 	font-size: 14px;
+}
+
+/* 🎯 提示词输入框样式 */
+#hintBox {
+	width: 70%;
+	padding: 0 15px;
+	border: 2px solid #ff9966;
+	border-radius: 8px;
+	font-size: 16px;
+	font-family: Noto;
+	outline: none;
+	transition: all 0.3s ease;
+	background: rgba(255, 255, 255, 0.9);
+	box-shadow: 0 2px 8px rgba(255, 153, 102, 0.2);
+	height: 40px;
+	box-sizing: border-box;
+	margin-right: 7px;
+}
+
+#hintBox:focus {
+	border-color: #ff6f00;
+	box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
+	background: white;
+}
+
+#hintBox::placeholder {
+	color: #ffab70;
+	opacity: 0.7;
+}
+
+/* 🎮 游戏内按钮特定样式 */
+#hint-input button,
+#guess-section button,
+#startGameBtn,
+#nextRoundBtn {
+	height: 40px !important;
+	font-size: 15px !important;
+	padding: 0 20px !important;
+	border-radius: 8px !important;
+	width: auto !important;
+	margin: auto !important;
+	overflow: visible !important;
+}
+
+/* ⏰ 倒计时样式 */
+#countdown {
+	margin-top: 20px !important;
+	margin-bottom: 10px !important;
+}
+
+/* 🎨 左右标签对立配色 */
+#left-label {
+	background: linear-gradient(135deg, #5a7ae7 0%, #7b94f7 100%);
+	padding: 10px 18px;
+	border-radius: 12px;
+	color: white;
+	font-weight: 700;
+	font-size: 15px;
+	box-shadow: 0 4px 15px rgba(90, 122, 231, 0.5),
+		0 2px 5px rgba(90, 122, 231, 0.3);
+	min-width: 100px;
+	text-align: center;
+	transition: all 0.3s ease;
+	border: 2px solid rgba(255, 255, 255, 0.4);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+#left-label:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(90, 122, 231, 0.6),
+		0 3px 8px rgba(90, 122, 231, 0.4);
+}
+
+#right-label {
+	background: linear-gradient(135deg, #ff7a7e 0%, #ffaa8e 100%);
+	padding: 10px 18px;
+	border-radius: 12px;
+	color: white;
+	font-weight: 700;
+	font-size: 15px;
+	box-shadow: 0 4px 15px rgba(255, 122, 126, 0.5),
+		0 2px 5px rgba(255, 122, 126, 0.3);
+	min-width: 100px;
+	text-align: center;
+	transition: all 0.3s ease;
+	border: 2px solid rgba(255, 255, 255, 0.4);
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+#right-label:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(255, 122, 126, 0.6),
+		0 3px 8px rgba(255, 122, 126, 0.4);
+}
+
+/* 🎯 猜测区域提示词醒目样式 */
+#guess-section p {
+	background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);
+	padding: 10px 20px;
+	border-radius: 10px;
+	margin: 15px auto;
+	max-width: 70%;
+	box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4),
+		0 2px 8px rgba(255, 153, 102, 0.3);
+	border: 2px solid rgba(255, 255, 255, 0.5);
+	animation: pulse 2s ease-in-out infinite;
+}
+
+#guess-section p {
+	font-size: 16px;
+	font-weight: 700;
+	color: white;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	letter-spacing: 0.5px;
+}
+
+#guess-section #hint {
+	font-size: 19px;
+	font-weight: 800;
+	color: #fff;
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4), 0 0 15px rgba(255, 255, 255, 0.3);
+	display: inline-block;
+	padding: 3px 12px;
+	background: rgba(0, 0, 0, 0.2);
+	border-radius: 6px;
+	margin-left: 8px;
+}
+
+/* 🌟 脉动动画效果 */
+@keyframes pulse {
+	0%,
+	100% {
+		transform: scale(1);
+		box-shadow: 0 6px 20px rgba(255, 111, 0, 0.4),
+			0 3px 10px rgba(255, 153, 102, 0.3);
+	}
+	50% {
+		transform: scale(1.02);
+		box-shadow: 0 8px 25px rgba(255, 111, 0, 0.6),
+			0 4px 15px rgba(255, 153, 102, 0.5);
+	}
 }
