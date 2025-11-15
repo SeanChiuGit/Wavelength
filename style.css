@@ -230,3 +230,54 @@ canvas {
 	fill: #ffa000; /* 鼠标悬停时的颜色 */
 	transform: scale(1.1); /* 鼠标悬停时放大 */
 }
+
+/* ⏰ 时间设置面板样式 */
+#time-settings {
+	font-family: Noto;
+}
+
+#time-settings h3 {
+	color: #333;
+	font-weight: 600;
+}
+
+#time-settings label {
+	color: #555;
+	font-size: 14px;
+}
+
+#time-settings input[type="range"] {
+	-webkit-appearance: none;
+	appearance: none;
+	background: rgba(74, 100, 247, 0.2);
+	outline: none;
+	border-radius: 5px;
+	height: 6px;
+}
+
+#time-settings input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 18px;
+	height: 18px;
+	background: #4a64f7;
+	cursor: pointer;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#time-settings input[type="range"]::-moz-range-thumb {
+	width: 18px;
+	height: 18px;
+	background: #4a64f7;
+	cursor: pointer;
+	border-radius: 50%;
+	border: none;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+#time-settings span {
+	color: #4a64f7;
+	font-weight: 600;
+	font-size: 14px;
+}

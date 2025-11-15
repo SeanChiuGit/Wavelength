@@ -11,6 +11,7 @@ const firebaseConfig = {
   appId: "1:942333085121:web:2d21b3c00a14f5b5941b40"
 };
 
+
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 
@@ -28,7 +29,11 @@ let lastGuessValue = 50;       // ✅ 初始滑条值（只写一次）
 let lastTickPlayTime = 0;      // ✅ 记录上次播放时间
 const MIN_TICK_INTERVAL = 40;  // ✅ 限制播放频率
 let moveSounds = [];           // ✅ 空数组，稍后填入音效元素
-let moveSoundIndex = 0; 
+let moveSoundIndex = 0;
+
+// ⏰ 时间设置变量
+let hintTimeLimit = 30;        // 出题时间限制（秒）
+let guessTimeLimit = 15;       // 猜测时间限制（秒） 
 
 // ✅ 等待 DOM 加载完再获取音效标签
 window.addEventListener("DOMContentLoaded", () => {
@@ -40,6 +45,19 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("moveSound4"),
   ];
 });
+
+// ⏰ 更新时间显示和配置
+function updateTimeDisplay(type) {
+  if (type === 'hint') {
+    const value = document.getElementById("hintTime").value;
+    hintTimeLimit = parseInt(value);
+    document.getElementById("hintTimeDisplay").textContent = value + "秒";
+  } else if (type === 'guess') {
+    const value = document.getElementById("guessTime").value;
+    guessTimeLimit = parseInt(value);
+    document.getElementById("guessTimeDisplay").textContent = value + "秒";
+  }
+}
 
 
 
@@ -62,114 +80,120 @@ const chineseWordBank = [
 ];
 
 const hintList = [
-  { left: "常说的话", right: "不常说的话" },
-  { left: "便宜", right: "昂贵" },
-  { left: "古老的", right: "现代的" },
+  // 🎭 情感与氛围
+  { left: "让人感动", right: "让人尴尬" },
+  { left: "浪漫的", right: "油腻的" },
+  { left: "温馨", right: "恐怖" },
+  { left: "治愈系", right: "致郁系" },
+  { left: "开心", right: "难过" },
+  { left: "乐观", right: "悲观" },
+  { left: "甜", right: "苦" },
   { left: "可爱的", right: "吓人的" },
-  { left: "儿童喜欢", right: "成人喜欢" },
-
-  { left: "现实中的", right: "幻想中的" },
-  { left: "粗糙", right: "光滑" },
-  { left: "单调", right: "丰富" },
-  { left: "清凉", right: "炽热" },
-  { left: "直线", right: "曲线" },
-
-  { left: "流行的", right: "小众的" },
-  { left: "迅速", right: "缓慢" },
-  { left: "无害", right: "危险" },
-  { left: "抽象", right: "具体" },
-  { left: "安静", right: "吵闹" },
-
-  { left: "理性", right: "感性" },
-  { left: "自然的", right: "人为的" },
-  { left: "传统的", right: "创新的" },
-  { left: "需要努力", right: "轻而易举" },
-  { left: "在地的", right: "全球的" },
   { left: "有趣的", right: "无聊的" },
+
+  // 🌈 审美与风格
+  { left: "土味", right: "高级感" },
+  { left: "极简风", right: "繁复风" },
+  { left: "赛博朋克", right: "田园牧歌" },
+  { left: "蒸汽朋克", right: "未来科幻" },
+  { left: "暗黑系", right: "小清新" },
+  { left: "对称", right: "不对称" },
+  { left: "明亮", right: "昏暗" },
+
+  // 🎪 社交与文化
+  { left: "社恐必备", right: "社牛必备" },
+  { left: "独处", right: "社交" },
+  { left: "沉默", right: "表达" },
+  { left: "高调", right: "低调" },
+  { left: "流行的", right: "小众的" },
+  { left: "网红款", right: "老字号" },
+  { left: "网络热梗", right: "文言雅词" },
+  { left: "常说的话", right: "不常说的话" },
+
+  // 🎮 体验与难度
+  { left: "硬核", right: "轻松" },
+  { left: "需要努力", right: "轻而易举" },
   { left: "简单", right: "复杂" },
+  { left: "一学就会", right: "十年如一日" },
+  { left: "新手友好", right: "劝退神器" },
+  { left: "佛系玩家", right: "肝帝必玩" },
+
+  // 🍕 生活与消费
+  { left: "便宜", right: "昂贵" },
+  { left: "学生党最爱", right: "中产标配" },
+  { left: "实用主义", right: "为爱发电" },
   { left: "有用", right: "无用" },
   { left: "好吃", right: "难吃" },
-  {left: "不可能的", right: "必然的" },
+  { left: "米其林", right: "深夜食堂" },
+  { left: "养生", right: "放纵" },
 
-  { left: "冷", right: "热" },
-  { left: "明亮", right: "昏暗" },
+  // 🚀 时间与空间
+  { left: "古老的", right: "现代的" },
+  { left: "传统", right: "创新" },
+  { left: "历史", right: "未来" },
+  { left: "童年回忆", right: "Z世代专属" },
   { left: "快", right: "慢" },
+  { left: "迅速", right: "缓慢" },
+  { left: "突发", right: "持续" },
+  { left: "近", right: "远" },
+  { left: "微观", right: "宏观" },
+  { left: "在地的", right: "全球的" },
+
+  // 🎨 形态与特征
+  { left: "冷", right: "热" },
+  { left: "清凉", right: "炽热" },
   { left: "高", right: "矮" },
   { left: "重", right: "轻" },
   { left: "硬", right: "软" },
-  { left: "复杂", right: "简单" },
-  { left: "强", right: "弱" },
-  { left: "安静", right: "嘈杂" },
-  { left: "开心", right: "难过" },
-  { left: "自然", right: "人工" },
-  { left: "清晰", right: "模糊" },
-  { left: "传统", right: "现代" },
-  { left: "浪漫", right: "现实" },
-  { left: "乐观", right: "悲观" },
-  { left: "主观", right: "客观" },
-  { left: "情绪化", right: "理性" },
-  { left: "甜", right: "苦" },
-  { left: "多", right: "少" },
-  { left: "近", right: "远" },
-  { left: "真实", right: "虚构" },
-  { left: "圆滑", right: "棱角分明" },
-  { left: "集中", right: "分散" },
-  { left: "保守", right: "开放" },
-  { left: "高调", right: "低调" },
   { left: "粗糙", right: "光滑" },
-  { left: "贵", right: "便宜" },
-  { left: "在地的", right: "全球的" },
+  { left: "直线", right: "曲线" },
+  { left: "圆滑", right: "棱角分明" },
+  { left: "多", right: "少" },
   { left: "单一", right: "多样" },
-  { left: "硬核", right: "轻松" },
-  { left: "地心引力", right: "太空漂浮" },
+  { left: "单调", right: "丰富" },
+  { left: "集中", right: "分散" },
+
+  // 🧠 认知与思维
+  { left: "理性", right: "感性" },
+  { left: "主观", right: "客观" },
+  { left: "情绪化", right: "理性思考" },
+  { left: "抽象", right: "具体" },
+  { left: "清晰", right: "模糊" },
+  { left: "深意", right: "无意义" },
+  { left: "直觉", right: "逻辑" },
+  { left: "浪漫主义", right: "现实主义" },
+
+  // 🌍 性质与状态
+  { left: "现实中的", right: "幻想中的" },
+  { left: "真实", right: "虚构" },
+  { left: "现实", right: "超现实" },
+  { left: "自然", right: "人工" },
+  { left: "生物", right: "机械" },
   { left: "童话", right: "纪实" },
-  { left: "沉默", right: "表达" },
-  { left: "独处", right: "社交" },
-  { left: "微观", right: "宏观" },
-  { left: "突发", right: "持续" },
+  { left: "安静", right: "吵闹" },
+  { left: "无声", right: "震耳欲聋" },
+  { left: "强", right: "弱" },
+
+  // 🎯 态度与价值
+  { left: "保守", right: "开放" },
+  { left: "谨慎", right: "冒险" },
+  { left: "无害", right: "危险" },
+  { left: "不可能的", right: "必然的" },
+  { left: "一次性", right: "永久" },
+  { left: "干预", right: "自然生长" },
+  { left: "儿童喜欢", right: "成人喜欢" },
+
+  // 🌟 创意与特殊
+  { left: "地心引力", right: "太空漂浮" },
   { left: "爆炸", right: "蒸发" },
   { left: "休眠", right: "爆发" },
-  { left: "历史", right: "未来" },
-  { left: "生物", right: "机械" },
-  { left: "无声", right: "震耳欲聋" },
-  { left: "干预", right: "自然生长" },
-  { left: "土味", right: "高级感" },
-  { left: "一次性", right: "永久" },
-  { left: "现实", right: "超现实" },
-  { left: "无意义", right: "深意" },
-  { left: "对称", right: "不对称" },
-
-  { left: "冷", right: "热" },
-  { left: "明亮", right: "昏暗" },
-  { left: "快", right: "慢" },
-  { left: "高", right: "矮" },
-  { left: "重", right: "轻" },
-  { left: "硬", right: "软" },
-  { left: "复杂", right: "简单" },
-  { left: "强", right: "弱" },
-  { left: "安静", right: "嘈杂" },
-  { left: "开心", right: "难过" },
-  { left: "自然", right: "人工" },
-  { left: "清晰", right: "模糊" },
-  { left: "传统", right: "现代" },
-  { left: "浪漫", right: "现实" },
-  { left: "乐观", right: "悲观" },
-  { left: "主观", right: "客观" },
-  { left: "情绪化", right: "理性" },
-  { left: "甜", right: "苦" },
-  { left: "多", right: "少" },
-  { left: "近", right: "远" },
-  { left: "真实", right: "虚构" },
-  { left: "圆滑", right: "棱角分明" },
-  { left: "集中", right: "分散" },
-  { left: "保守", right: "开放" },
-  { left: "高调", right: "低调" },
-  { left: "粗糙", right: "光滑" },
-  { left: "贵", right: "便宜" },
-  { left: "在地的", right: "全球的" },
-  { left: "单一", right: "多样" },
-  { left: "硬核", right: "轻松" }
-
+  { left: "白日梦", right: "噩梦" },
+  { left: "蜜糖", right: "砒霜" },
+  { left: "刚需", right: "智商税" },
+  { left: "YYDS", right: "DDDD" },
+  { left: "emo了", right: "起飞了" },
+  { left: "很抽象", right: "很具象" },
+  { left: "纯纯牛马", right: "绝世高手" }
 ];
 
 // -------------------------
@@ -489,7 +513,7 @@ function startListening() {
         if (hintInput) hintInput.style.display = "block";
 
         drawArc(true);
-        startCountdown(data.phaseStartTime, 30);
+        startCountdown(data.phaseStartTime, hintTimeLimit);
       } else {
         const gameStep = document.getElementById("game-step");
         const guessSection = document.getElementById("guess-section");
@@ -508,7 +532,7 @@ function startListening() {
         if (guessSection) guessSection.style.display = "block";
         if (gameStep) gameStep.innerText = "拖动以调整猜测区域";
 
-        startCountdown(data.phaseStartTime, 15);
+        startCountdown(data.phaseStartTime, guessTimeLimit);
       } else {
         // 当前玩家等待对方猜测，无需处理
       }

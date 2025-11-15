@@ -50,6 +50,25 @@
       </div>
     </div>
 
+    <!-- ⏰ 时间设置面板 -->
+    <div id="time-settings" style="margin: 20px auto; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; max-width: 400px;">
+      <h3 style="margin: 0 0 10px 0; font-size: 16px;">⚙️ 时间设置</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <label for="hintTime" style="flex: 1;">出题时间：</label>
+          <input type="range" id="hintTime" min="10" max="60" value="30" step="5"
+                 style="flex: 2; margin: 0 10px;" oninput="updateTimeDisplay('hint')">
+          <span id="hintTimeDisplay" style="min-width: 50px; text-align: right;">30秒</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <label for="guessTime" style="flex: 1;">猜测时间：</label>
+          <input type="range" id="guessTime" min="10" max="60" value="15" step="5"
+                 style="flex: 2; margin: 0 10px;" oninput="updateTimeDisplay('guess')">
+          <span id="guessTimeDisplay" style="min-width: 50px; text-align: right;">15秒</span>
+        </div>
+      </div>
+    </div>
+
 
 
     <div class="dimension">
