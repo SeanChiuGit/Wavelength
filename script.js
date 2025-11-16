@@ -25,15 +25,15 @@ let topic = {};
 let guessPercent = null;
 let currentTurn = "host"; // host 先出题
 
-let lastGuessValue = 50; // ✅ 初始滑条值（只写一次）
-let lastTickPlayTime = 0; // ✅ 记录上次播放时间
-const MIN_TICK_INTERVAL = 40; // ✅ 限制播放频率
-let moveSounds = []; // ✅ 空数组，稍后填入音效元素
+let lastGuessValue = 50;
+let lastTickPlayTime = 0;
+const MIN_TICK_INTERVAL = 40;
+let moveSounds = [];
 let moveSoundIndex = 0;
 
 // ⏰ 时间设置变量
-let hintTimeLimit = 30; // 出题时间限制（秒）
-let guessTimeLimit = 15; // 猜测时间限制（秒）
+let hintTimeLimit = 30;
+let guessTimeLimit = 15;
 
 // ✅ 等待 DOM 加载完再获取音效标签
 window.addEventListener("DOMContentLoaded", () => {
@@ -364,8 +364,8 @@ function createRoom() {
 		host: true,
 		gameState: "waiting",
 		timeSettings: {
-			hintTime: hintTimeLimit, // 初始化默认出题时间
-			guessTime: guessTimeLimit, // 初始化默认猜测时间
+			hintTime: hintTimeLimit,
+			guessTime: guessTimeLimit,
 		},
 	});
 	document.getElementById("connection-status").textContent =
@@ -428,7 +428,6 @@ function confirmHint(countdown = false) {
 		const word =
 			chineseWordBank[Math.floor(Math.random() * chineseWordBank.length)];
 		document.getElementById("hintBox").value = word;
-		// alert("⏰ 时间到！你没能及时出题！系统随机生成了提示词：" + word);
 	}
 	const hint = document.getElementById("hintBox").value.trim();
 	if (!hint) return alert("请输入提示词！");
@@ -436,7 +435,7 @@ function confirmHint(countdown = false) {
 		currentHint: hint,
 		gameState: "guessPhase",
 		showTarget: false,
-		phaseStartTime: Date.now(), // 出题阶段开始时间
+		phaseStartTime: Date.now(),
 	});
 	document.getElementById("hint-input").style.display = "none";
 	document.getElementById("game-step").innerText =
@@ -452,10 +451,39 @@ function confirmHint(countdown = false) {
 function joinRoom() {
 	currentRoomId = document.getElementById("roomId").value.trim();
 	if (!currentRoomId) return alert("请输入房间号");
-	playerRole = "guest";
-	database.ref("rooms/" + currentRoomId).update({ guest: true });
-	document.getElementById("connection-status").textContent = "✅ 已加入房间";
-	startListening();
+
+	// 🔍 检查房间是否存在并且有效
+	database
+		.ref("rooms/" + currentRoomId)
+		.once("value")
+		.then((snapshot) => {
+			const roomData = snapshot.val();
+
+			// 检查房间是否存在且有房主
+			if (!snapshot.exists() || !roomData || !roomData.host) {
+				alert("❌ 房间不存在，请检查房间号是否正确");
+				currentRoomId = null;
+				return;
+			}
+
+			// 检查房间是否已经有客人了
+			if (roomData.guest) {
+				alert("❌ 房间已满，无法加入");
+				currentRoomId = null;
+				return;
+			}
+
+			// 房间存在且有效，继续加入
+			playerRole = "guest";
+			database.ref("rooms/" + currentRoomId).update({ guest: true });
+			document.getElementById("connection-status").textContent =
+				"✅ 已加入房间";
+			startListening();
+		})
+		.catch((error) => {
+			alert("连接失败：" + error.message);
+			currentRoomId = null;
+		});
 }
 
 function submitGuess(countdown = false) {
@@ -466,7 +494,6 @@ function submitGuess(countdown = false) {
 		document.getElementById("guessSlider").value = Math.floor(
 			Math.random() * 100
 		);
-		// alert("⏰ 时间到！你没能及时猜测！系统随机生成了猜测值：" + document.getElementById("guessSlider").value);
 	}
 	const guess = parseInt(document.getElementById("guessSlider").value);
 	guessPercent = guess;
@@ -510,11 +537,10 @@ function submitGuess(countdown = false) {
 		showTarget: true,
 		showGuess: true,
 		liveGuess: guess,
-		updatedAt: Date.now(), // ✅ 强制变化，触发监听器
+		updatedAt: Date.now(),
 	});
 
 	if (countdown) {
-		// document.getElementById("guessSlider").value = Math.floor(Math.random() * 100);
 		alert(
 			"⏰ 时间到！你没能及时猜测！系统随机生成了猜测值：" +
 				document.getElementById("guessSlider").value
@@ -591,13 +617,11 @@ function startCountdown(startTime, durationInSeconds) {
 
 function handleTimeout() {
 	if (document.getElementById("hint-input").style.display !== "none") {
-		// alert("⏰ 时间到！你没能及时出题！");
-		confirmHint(true); // 自动提交空提示或提示框已有内容
+		confirmHint(true);
 	} else if (
 		document.getElementById("guess-section").style.display !== "none"
 	) {
-		// alert("⏰ 时间到！你没能及时猜测！");
-		submitGuess(true); // 自动提交当前滑动值
+		submitGuess(true);
 	}
 }
 
@@ -652,9 +676,7 @@ function startListening() {
 				drawArc(true);
 				startCountdown(data.phaseStartTime, hintTimeLimit);
 			} else {
-				const gameStep = document.getElementById("game-step");
 				const guessSection = document.getElementById("guess-section");
-				// if (gameStep) gameStep.innerText = "🕐 等待对方输入提示词...";
 				if (guessSection) guessSection.style.display = "none";
 			}
 		}
@@ -667,11 +689,9 @@ function startListening() {
 
 				if (hintElem) hintElem.innerText = data.currentHint;
 				if (guessSection) guessSection.style.display = "block";
-				if (gameStep) gameStep.innerText = ""; // 清空"等待对方输入提示词..."的提示
+				if (gameStep) gameStep.innerText = "";
 
 				startCountdown(data.phaseStartTime, guessTimeLimit);
-			} else {
-				// 当前玩家等待对方猜测，无需处理
 			}
 		}
 
@@ -741,5 +761,22 @@ document.getElementById("guessSlider").addEventListener("input", () => {
 		guessPercent = newValue;
 		drawArc(false, true);
 		database.ref("rooms/" + currentRoomId).update({ liveGuess: guessPercent });
+	}
+});
+
+// -------------------------
+// ⌨️ Enter 键提交支持
+// -------------------------
+// 房间号输入框按 Enter 加入房间
+document.getElementById("roomId").addEventListener("keypress", (e) => {
+	if (e.key === "Enter") {
+		joinRoom();
+	}
+});
+
+// 提示词输入框按 Enter 确认提示
+document.getElementById("hintBox").addEventListener("keypress", (e) => {
+	if (e.key === "Enter") {
+		confirmHint();
 	}
 });

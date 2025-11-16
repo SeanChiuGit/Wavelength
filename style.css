@@ -1,16 +1,21 @@
+/* 引入本地 Zaio 字体 */
 @font-face {
-	font-family: "MyFont";
-	src: url("fonts/Zaio.otf");
+	font-family: "Zaio";
+	src: url("fonts/Zaio.otf") format("opentype");
+	font-weight: normal;
+	font-style: normal;
 }
 
-@font-face {
-	font-family: Noto;
-	src: url("fonts/SourceHanSansCN-Regular.otf");
+/* 使用 Google Fonts 的现代字体 */
+:root {
+	--font-main: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI",
+		sans-serif;
+	--font-title: "ZCOOL XiaoWei", "Noto Sans SC", cursive, sans-serif;
 }
 
 button,
 input {
-	font-family: Noto;
+	font-family: var(--font-main);
 }
 
 /* CSS */
@@ -25,7 +30,7 @@ input {
 	box-sizing: border-box;
 	color: #fff;
 	cursor: pointer;
-	font-family: Noto;
+	font-family: var(--font-main);
 	font-size: 80%;
 	height: 25px;
 	line-height: 1.15;
@@ -133,7 +138,7 @@ input {
 }
 
 body {
-	font-family: Noto;
+	font-family: var(--font-main);
 	margin: 0;
 	padding: 0;
 	background: linear-gradient(to bottom, #ffcc70, #ff9966); /* 橘色渐变背景 */
@@ -245,13 +250,32 @@ canvas {
 	width: 100%;
 }
 
+/* 🎯 房间号输入框样式 */
 #roomId {
 	width: 100%;
 	box-sizing: border-box;
-	padding: 4px 8px;
-	border-radius: 4px;
-	border: 1px solid #ddd;
+	padding: 0 12px;
+	border: 2px solid #ddd;
+	border-radius: 6px;
+	font-size: 14px;
+	font-family: var(--font-main);
+	outline: none;
+	transition: all 0.3s ease;
+	background: rgba(255, 255, 255, 0.9);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 	height: 25px;
+}
+
+#roomId:focus {
+	border-color: #4a64f7;
+	box-shadow: 0 3px 10px rgba(74, 100, 247, 0.2);
+	background: white;
+	transform: translateY(-1px);
+}
+
+#roomId::placeholder {
+	color: #aaa;
+	opacity: 0.8;
 }
 
 #join {
@@ -265,9 +289,15 @@ canvas {
 	padding: 0 5px;
 }
 
+/* 🎯 连接状态文本样式 */
 #connection-status {
-	display: block;
-	font-size: 14px;
+	display: inline-block;
+	font-size: 13px;
+	padding: 3px 8px;
+	border-radius: 4px;
+	font-weight: 500;
+	background: rgba(240, 240, 240, 0.5);
+	transition: all 0.3s ease;
 }
 
 #game-step {
@@ -294,32 +324,64 @@ canvas {
 }
 
 #title {
-	font-family: Myfont;
+	font-family: "Zaio";
 	font-size: 75px;
 	justify-content: center;
 	align-items: center;
+	letter-spacing: -0.1em;
 }
 
 #title svg {
-	font-family: "MyFont";
+	font-family: "Zaio";
 	fill: #ff6f00; /* 默认文字颜色 */
 	transform: translateY(10px); /* 整体向下移动 */
 }
 
-#title textPath {
-	font-weight: bold;
-	letter-spacing: -5px;
-	transition: fill 0.3s ease, transform 0.3s ease;
+#title textPath tspan {
+	transition: fill 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+		transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
-#title textPath:hover {
-	fill: #ffa000; /* 鼠标悬停时的颜色 */
-	transform: scale(1.1); /* 鼠标悬停时放大 */
+/* 从左到右依次应用延迟 */
+#title textPath tspan:nth-child(1) {
+	transition-delay: 0s;
+}
+#title textPath tspan:nth-child(2) {
+	transition-delay: 0.05s;
+}
+#title textPath tspan:nth-child(3) {
+	transition-delay: 0.1s;
+}
+#title textPath tspan:nth-child(4) {
+	transition-delay: 0.15s;
+}
+#title textPath tspan:nth-child(5) {
+	transition-delay: 0.2s;
+}
+#title textPath tspan:nth-child(6) {
+	transition-delay: 0.25s;
+}
+#title textPath tspan:nth-child(7) {
+	transition-delay: 0.3s;
+}
+#title textPath tspan:nth-child(8) {
+	transition-delay: 0.35s;
+}
+#title textPath tspan:nth-child(9) {
+	transition-delay: 0.4s;
+}
+#title textPath tspan:nth-child(10) {
+	transition-delay: 0.45s;
+}
+
+#title:hover textPath tspan {
+	fill: #ffa000;
+	transform: scale(1);
 }
 
 /* ⏰ 时间设置面板样式 */
 #time-settings {
-	font-family: Noto;
+	font-family: var(--font-main);
 }
 
 #time-settings h3 {
@@ -375,7 +437,7 @@ canvas {
 	border: 2px solid #ff9966;
 	border-radius: 8px;
 	font-size: 16px;
-	font-family: Noto;
+	font-family: var(--font-main);
 	outline: none;
 	transition: all 0.3s ease;
 	background: rgba(255, 255, 255, 0.9);
