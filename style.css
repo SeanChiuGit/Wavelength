@@ -570,3 +570,12 @@ canvas {
 			0 4px 15px rgba(255, 153, 102, 0.5);
 	}
 }
+
+/* 🔄 模式切换按钮样式 */
+a[href="singleplayer.html"]:hover,
+a[href="index.html"]:hover {
+	background: #4a64f7 !important;
+	color: white !important;
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(74, 100, 247, 0.3) !important;
+}

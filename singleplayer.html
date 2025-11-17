@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Wavelength 单人模式</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+XiaoWei&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <!-- ✅ 礼炮特效库 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* 单人模式专属样式 */
+    #difficulty-selection {
+      margin: 30px 0;
+    }
+
+    .difficulty-btn {
+      margin: 10px;
+      padding: 15px 30px;
+      font-size: 18px;
+      width: 150px;
+      height: auto !important;
+      background: linear-gradient(135deg, #4a64f7 0%, #6a82f7 100%);
+      transition: all 0.3s ease;
+    }
+
+    .difficulty-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(74, 100, 247, 0.5);
+    }
+
+    .difficulty-btn.active {
+      background: linear-gradient(135deg, #ff6f00 0%, #ff9966 100%);
+    }
+
+    #game-area {
+      display: none;
+    }
+
+    #score-display {
+      display: none;
+      background: linear-gradient(135deg, #4a64f7 0%, #6a82f7 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin: 20px 0;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(74, 100, 247, 0.4);
+    }
+
+    #question-text {
+      background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 24px;
+      font-weight: 800;
+      margin: 20px 0;
+      box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    #result-section {
+      display: none;
+      margin: 20px 0;
+    }
+
+    #feedback-survey {
+      display: none;
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .feedback-btn {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 24px;
+      background: transparent;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .feedback-btn:hover {
+      transform: scale(1.2);
+      border-color: #4a64f7;
+    }
+
+    .mode-switch {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .mode-switch a {
+      color: #4a64f7;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .mode-switch a:hover {
+      background: #4a64f7;
+      color: white;
+      transform: translateY(-2px);
+    }
+
+    .difficulty-controls {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .small-difficulty-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      width: auto;
+      height: auto !important;
+      background: rgba(74, 100, 247, 0.2);
+      color: #4a64f7;
+      border: 2px solid #4a64f7;
+    }
+
+    .small-difficulty-btn.active {
+      background: #4a64f7;
+      color: white;
+    }
+
+    #back-to-menu {
+      margin-top: 20px;
+      background: rgba(150, 150, 150, 0.3);
+      color: #666;
+      border: 2px solid #999;
+    }
+
+    #back-to-menu:hover {
+      background: #999;
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 模式切换按钮 -->
+    <div class="mode-switch">
+      <a href="index.html">🔄 切换到多人模式</a>
+    </div>
+
+    <!-- 标题 -->
+    <div id="title">
+      <svg width="500" height="200" viewBox="0 -10 500 200">
+        <path id="arcPath" d="M50,140 A400,400 0 0,1 450,140" fill="none" />
+        <text>
+          <textPath href="#arcPath" startOffset="50%" text-anchor="middle">
+            <tspan>W</tspan>
+            <tspan>A</tspan>
+            <tspan>V</tspan>
+            <tspan>E</tspan>
+            <tspan>L</tspan>
+            <tspan>E</tspan>
+            <tspan>N</tspan>
+            <tspan>G</tspan>
+            <tspan>T</tspan>
+            <tspan>H</tspan>
+          </textPath>
+        </text>
+      </svg>
+    </div>
+
+    <h2 style="margin: 10px 0; color: #4a64f7;">🎮 单人模式</h2>
+
+    <!-- 难度选择 -->
+    <div id="difficulty-selection">
+      <h3>选择难度开始游戏：</h3>
+      <button class="button-9 difficulty-btn" onclick="startGame('easy')">😊 简单</button>
+      <button class="button-9 difficulty-btn" onclick="startGame('medium')">🤔 中等</button>
+      <button class="button-9 difficulty-btn" onclick="startGame('hard')">🔥 困难</button>
+    </div>
+
+    <!-- 分数显示 -->
+    <div id="score-display"></div>
+
+    <!-- 游戏区域 -->
+    <div id="game-area">
+      <!-- 难度切换 -->
+      <div class="difficulty-controls">
+        <button id="diff-easy" class="button-9 small-difficulty-btn active"
+          onclick="changeDifficulty('easy')">简单</button>
+        <button id="diff-medium" class="button-9 small-difficulty-btn"
+          onclick="changeDifficulty('medium')">中等</button>
+        <button id="diff-hard" class="button-9 small-difficulty-btn" onclick="changeDifficulty('hard')">困难</button>
+      </div>
+
+      <!-- 题目显示 -->
+      <div id="question-text">加载中...</div>
+
+      <!-- 频谱显示 -->
+      <div class="dimension">
+        <span id="left-label">加载中...</span>
+        <canvas id="arcCanvas" width="400" height="250"></canvas>
+        <span id="right-label">加载中...</span>
+      </div>
+
+      <!-- 猜测区域 -->
+      <div id="guess-section">
+        <p style="font-size: 18px; margin: 20px 0;">📍 拖动滑条或点击弧线进行猜测</p>
+        <input type="range" id="guessSlider" min="0" max="100" value="50">
+        <br>
+        <button class="button-9" role="button" onclick="submitGuess()" style="margin-top: 15px;">👍 提交答案</button>
+      </div>
+
+      <!-- 结果区域 -->
+      <div id="result-section">
+        <div id="result-text"></div>
+        <button class="button-9" role="button" onclick="loadNextQuestion()"
+          style="margin-top: 20px; background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);">🔁 下一题</button>
+      </div>
+
+      <!-- 反馈调查 -->
+      <div id="feedback-survey">
+        <p style="font-size: 16px; margin-bottom: 10px;">这道题怎么样？</p>
+        <button class="feedback-btn" onclick="submitFeedback('up')">👍</button>
+        <button class="feedback-btn" onclick="submitFeedback('down')">👎</button>
+      </div>
+
+      <!-- 返回按钮 -->
+      <button id="back-to-menu" class="button-9" onclick="backToMenu()">⬅️ 返回主菜单</button>
+    </div>
+  </div>
+
+  <!-- 规则说明 -->
+  <div style="text-align: center;">
+    <div id="rules">
+      <h3 id="rules-title">单人模式规则</h3>
+      <p>1. 选择难度开始游戏</p>
+      <p>2. 查看题目，在频谱上猜测答案的位置</p>
+      <p>3. 猜得越准确，得分越高！挑战你的判断力！🎯</p>
+    </div>
+  </div>
+
+  <!-- 🎊 庆祝音效 -->
+  <audio id="celebrateSound" src="assets/partypop.mp3" preload="auto"></audio>
+
+  <!-- 游戏逻辑脚本 -->
+  <script src="singleplayer.js"></script>
+</body>
+
+</html>
