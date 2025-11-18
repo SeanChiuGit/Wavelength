@@ -533,7 +533,6 @@ canvas {
 	box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4),
 		0 2px 8px rgba(255, 153, 102, 0.3);
 	border: 2px solid rgba(255, 255, 255, 0.5);
-	animation: pulse 2s ease-in-out infinite;
 }
 
 #guess-section p {
