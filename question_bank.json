@@ -1,312 +1,234 @@
 {
   "version": "1.0.0",
   "total_questions": 30,
-  "questions": {
-    "easy": [
-      {
-        "id": "easy_001",
-        "topic_pair": "冰冻寒冷 ↔ 炙热灼热",
-        "target_position": 15,
-        "difficulty": "easy",
-        "range_hint": [5, 30],
-        "question_text": "南极洲",
-        "question_creator": "陈艾玛",
-        "explanation_for_creator": "具有极端气候的地理位置很直观。南极洲是公认的极度寒冷之地。"
-      },
-      {
-        "id": "easy_002",
-        "topic_pair": "微小 ↔ 巨大",
-        "target_position": 8,
-        "difficulty": "easy",
-        "range_hint": [0, 20],
-        "question_text": "蚂蚁",
-        "question_creator": "李明",
-        "explanation_for_creator": "常见动物提供清晰的大小参照。蚂蚁是人们日常遇到的最小生物之一。"
-      },
-      {
-        "id": "easy_003",
-        "topic_pair": "缓慢 ↔ 快速",
-        "target_position": 92,
-        "difficulty": "easy",
-        "range_hint": [80, 100],
-        "question_text": "猎豹",
-        "question_creator": "王小红",
-        "explanation_for_creator": "动物速度比较很直接。猎豹是最快的陆地动物——这是个简单的文化常识。"
-      },
-      {
-        "id": "easy_004",
-        "topic_pair": "安静 ↔ 吵闹",
-        "target_position": 88,
-        "difficulty": "easy",
-        "range_hint": [75, 95],
-        "question_text": "摇滚音乐会",
-        "question_creator": "张伟",
-        "explanation_for_creator": "音量明显的日常体验最适合简单问题。"
-      },
-      {
-        "id": "easy_005",
-        "topic_pair": "便宜 ↔ 昂贵",
-        "target_position": 94,
-        "difficulty": "easy",
-        "range_hint": [85, 100],
-        "question_text": "私人飞机",
-        "question_creator": "刘芳",
-        "explanation_for_creator": "价格标签众所周知的奢侈品。私人飞机被公认为极其昂贵。"
-      },
-      {
-        "id": "easy_006",
-        "topic_pair": "虚弱 ↔ 强壮",
-        "target_position": 11,
-        "difficulty": "easy",
-        "range_hint": [0, 25],
-        "question_text": "刚出生的婴儿",
-        "question_creator": "赵敏",
-        "explanation_for_creator": "生命阶段提供清晰的力量对比。新生儿被普遍理解为身体虚弱的。"
-      },
-      {
-        "id": "easy_007",
-        "topic_pair": "无聊 ↔ 有趣",
-        "target_position": 6,
-        "difficulty": "easy",
-        "range_hint": [0, 20],
-        "question_text": "看油漆变干",
-        "question_creator": "孙悦",
-        "explanation_for_creator": "常见习语是优秀的简单问题。这个短语字面意思是'极其无聊'。"
-      },
-      {
-        "id": "easy_008",
-        "topic_pair": "健康 ↔ 不健康",
-        "target_position": 89,
-        "difficulty": "easy",
-        "range_hint": [75, 95],
-        "question_text": "油炸黄油",
-        "question_creator": "周杰",
-        "explanation_for_creator": "极端食物例子创造明确共识。油炸黄油显然不健康。"
-      },
-      {
-        "id": "easy_009",
-        "topic_pair": "安全 ↔ 危险",
-        "target_position": 96,
-        "difficulty": "easy",
-        "range_hint": [90, 100],
-        "question_text": "与大白鲨一起游泳",
-        "question_creator": "吴磊",
-        "explanation_for_creator": "风险等级明显的活动。与鲨鱼游泳被普遍认为是危险的。"
-      },
-      {
-        "id": "easy_010",
-        "topic_pair": "矮小 ↔ 高大",
-        "target_position": 91,
-        "difficulty": "easy",
-        "range_hint": [80, 100],
-        "question_text": "埃菲尔铁塔",
-        "question_creator": "郑娜",
-        "explanation_for_creator": "高度已知的著名地标。埃菲尔铁塔是高大建筑的标志性例子。"
-      }
-    ],
-    "medium": [
-      {
-        "id": "medium_001",
-        "topic_pair": "无用发明 ↔ 必需发明",
-        "target_position": 71,
-        "difficulty": "medium",
-        "range_hint": [55, 85],
-        "question_text": "冰箱",
-        "question_creator": "陈思",
-        "explanation_for_creator": "现代便利设施因文化而异。冰箱在发达国家非常重要，但不是绝对普遍的。"
-      },
-      {
-        "id": "medium_002",
-        "topic_pair": "容易学 ↔ 难以学习",
-        "target_position": 68,
-        "difficulty": "medium",
-        "range_hint": [50, 80],
-        "question_text": "弹钢琴",
-        "question_creator": "马可",
-        "explanation_for_creator": "具有渐进学习曲线的技能。钢琴入门容易但精通需要多年——创造频谱模糊性。"
-      },
-      {
-        "id": "medium_003",
-        "topic_pair": "可忘记 ↔ 难忘的",
-        "target_position": 77,
-        "difficulty": "medium",
-        "range_hint": [60, 90],
-        "question_text": "你的初吻",
-        "question_creator": "林雪",
-        "explanation_for_creator": "具有情感重量的普遍生活经历。大多数人会记得这个，但强度因人而异。"
-      },
-      {
-        "id": "medium_004",
-        "topic_pair": "虚构 ↔ 真实",
-        "target_position": 58,
-        "difficulty": "medium",
-        "range_hint": [40, 75],
-        "question_text": "独角兽（古代文献中描述的动物）",
-        "question_creator": "何建",
-        "explanation_for_creator": "历史模糊性创造中等难度。一些古代记载可能指的是被误认为独角兽的真实动物。"
-      },
-      {
-        "id": "medium_005",
-        "topic_pair": "被低估 ↔ 被高估",
-        "target_position": 64,
-        "difficulty": "medium",
-        "range_hint": [45, 80],
-        "question_text": "披头士乐队",
-        "question_creator": "钱多多",
-        "explanation_for_creator": "地位可争议的文化偶像。披头士传奇性十足，但有人认为他们被过分炒作——创造频谱张力。"
-      },
-      {
-        "id": "medium_006",
-        "topic_pair": "简单 ↔ 复杂",
-        "target_position": 73,
-        "difficulty": "medium",
-        "range_hint": [55, 85],
-        "question_text": "人类大脑",
-        "question_creator": "孙丽",
-        "explanation_for_creator": "具有分层复杂性的自然现象。大脑显然很复杂，但对其在宇宙中的排名存在争论。"
-      },
-      {
-        "id": "medium_007",
-        "topic_pair": "确定 ↔ 不确定",
-        "target_position": 44,
-        "difficulty": "medium",
-        "range_hint": [30, 65],
-        "question_text": "明天地球上某处会下雨",
-        "question_creator": "周瑜",
-        "explanation_for_creator": "概率性陈述。这很可能（鉴于地球的大小）但不是100%确定——测试逻辑推理。"
-      },
-      {
-        "id": "medium_008",
-        "topic_pair": "浪费时间 ↔ 有生产力",
-        "target_position": 38,
-        "difficulty": "medium",
-        "range_hint": [20, 55],
-        "question_text": "刷社交媒体",
-        "question_creator": "黄晓明",
-        "explanation_for_creator": "具有混合价值的现代活动。社交媒体可以是教育性的或浪费时间的，取决于使用方式。"
-      },
-      {
-        "id": "medium_009",
-        "topic_pair": "自然 ↔ 人工",
-        "target_position": 52,
-        "difficulty": "medium",
-        "range_hint": [35, 70],
-        "question_text": "城市中心的公园",
-        "question_creator": "杨洋",
-        "explanation_for_creator": "混合概念模糊频谱。城市公园使用自然元素但由人类刻意设计。"
-      },
-      {
-        "id": "medium_010",
-        "topic_pair": "道德正确 ↔ 道德错误",
-        "target_position": 67,
-        "difficulty": "medium",
-        "range_hint": [50, 80],
-        "question_text": "为保护别人感受而撒谎",
-        "question_creator": "陈晨",
-        "explanation_for_creator": "没有明确答案的道德困境。'善意的谎言'通常被认为更正确而非错误，但意见不一。"
-      }
-    ],
-    "hard": [
-      {
-        "id": "hard_001",
-        "topic_pair": "客观真实 ↔ 客观虚假",
-        "target_position": 47,
-        "difficulty": "hard",
-        "range_hint": [30, 70],
-        "question_text": "自由意志存在",
-        "question_creator": "李哲",
-        "explanation_for_creator": "没有共识的哲学问题。自由意志被神经科学家和哲学家争论——不存在客观答案。"
-      },
-      {
-        "id": "hard_002",
-        "topic_pair": "人人喜爱 ↔ 人人讨厌",
-        "target_position": 83,
-        "difficulty": "hard",
-        "range_hint": [65, 95],
-        "question_text": "闹钟的声音",
-        "question_creator": "王哲学",
-        "explanation_for_creator": "具有隐藏复杂性的主观体验。大多数人讨厌闹钟声，但有些人积极地将其与生产力/例行公事联系在一起。"
-      },
-      {
-        "id": "hard_003",
-        "topic_pair": "技能 ↔ 运气",
-        "target_position": 56,
-        "difficulty": "hard",
-        "range_hint": [35, 75],
-        "question_text": "赢得德州扑克",
-        "question_creator": "赵赌神",
-        "explanation_for_creator": "混合多个因素的活动。扑克涉及技能（策略）和运气（发牌）——比例备受争议。"
-      },
-      {
-        "id": "hard_004",
-        "topic_pair": "艺术 ↔ 非艺术",
-        "target_position": 62,
-        "difficulty": "hard",
-        "range_hint": [40, 80],
-        "question_text": "用胶带把香蕉贴在墙上（售价12万美元）",
-        "question_creator": "艾未未",
-        "explanation_for_creator": "概念艺术挑战定义。这件真实艺术品在什么构成艺术与奇观方面产生分歧。"
-      },
-      {
-        "id": "hard_005",
-        "topic_pair": "需要政府监管 ↔ 不需要监管",
-        "target_position": 71,
-        "difficulty": "hard",
-        "range_hint": [50, 85],
-        "question_text": "人工智能开发",
-        "question_creator": "马云飞",
-        "explanation_for_creator": "当代政策辩论。AI监管正在积极争论中，双方都有有效论据。"
-      },
-      {
-        "id": "hard_006",
-        "topic_pair": "天性 ↔ 培养",
-        "target_position": 54,
-        "difficulty": "hard",
-        "range_hint": [35, 70],
-        "question_text": "人类智力",
-        "question_creator": "诸葛亮",
-        "explanation_for_creator": "没有共识的科学问题。智力的天性与培养辩论在心理学中仍未解决。"
-      },
-      {
-        "id": "hard_007",
-        "topic_pair": "应该存在 ↔ 不应该存在",
-        "target_position": 59,
-        "difficulty": "hard",
-        "range_hint": [40, 75],
-        "question_text": "亿万富翁",
-        "question_creator": "马克思",
-        "explanation_for_creator": "政治敏感话题。关于财富不平等的观点基于经济哲学跨越频谱。"
-      },
-      {
-        "id": "hard_008",
-        "topic_pair": "已解决问题 ↔ 未解决问题",
-        "target_position": 42,
-        "difficulty": "hard",
-        "range_hint": [25, 65],
-        "question_text": "意识",
-        "question_creator": "笛卡尔",
-        "explanation_for_creator": "部分进展的科学谜团。我们理解一些机制，但'意识的难题'仍未解决。"
-      },
-      {
-        "id": "hard_009",
-        "topic_pair": "帮助人类 ↔ 伤害人类",
-        "target_position": 48,
-        "difficulty": "hard",
-        "range_hint": [30, 70],
-        "question_text": "社交媒体平台",
-        "question_creator": "扎克伯格",
-        "explanation_for_creator": "具有混合影响的技术。社交媒体连接人们，但也传播错误信息——真正地在频谱上平衡。"
-      },
-      {
-        "id": "hard_010",
-        "topic_pair": "永恒 ↔ 10年后将被遗忘",
-        "target_position": 37,
-        "difficulty": "hard",
-        "range_hint": [20, 60],
-        "question_text": "加密货币",
-        "question_creator": "中本聪",
-        "explanation_for_creator": "寿命不明确的近期现象。加密货币可能是基础性的或只是一时风尚——未来不确定性创造难度。"
-      }
-    ]
+  "creators": {
+    "Sean": {
+      "name": "Sean",
+      "description": "充满创意的题目设计师",
+      "questions": [
+        {
+          "id": "sean_001",
+          "topic_pair": "冰冻寒冷 ↔ 炙热灼热",
+          "target_position": 15,
+          "question_text": "南极洲",
+          "question_creator": "Sean"
+        },
+        {
+          "id": "sean_002",
+          "topic_pair": "微小 ↔ 巨大",
+          "target_position": 8,
+          "question_text": "蚂蚁",
+          "question_creator": "Sean"
+        },
+        {
+          "id": "sean_003",
+          "topic_pair": "缓慢 ↔ 快速",
+          "target_position": 92,
+          "question_text": "猎豹",
+          "question_creator": "Sean"
+        },
+        {
+          "id": "sean_004",
+          "topic_pair": "安静 ↔ 吵闹",
+          "target_position": 88,
+          "question_text": "摇滚音乐会",
+          "question_creator": "Sean"
+        },
+        {
+          "id": "sean_005",
+          "topic_pair": "便宜 ↔ 昂贵",
+          "target_position": 94,
+          "question_text": "私人飞机",
+          "question_creator": "Sean"
+        },
+        {
+          "id": "sean_006",
+          "topic_pair": "虚弱 ↔ 强壮",
+          "target_position": 11,
+          "question_text": "刚出生的婴儿",
+          "question_creator": "Sean"
+        },
+        {
+          "id": "sean_007",
+          "topic_pair": "无聊 ↔ 有趣",
+          "target_position": 6,
+          "question_text": "看油漆变干",
+          "question_creator": "Sean"
+        },
+        {
+          "id": "sean_008",
+          "topic_pair": "健康 ↔ 不健康",
+          "target_position": 89,
+          "question_text": "油炸黄油",
+          "question_creator": "Sean"
+        },
+        {
+          "id": "sean_009",
+          "topic_pair": "安全 ↔ 危险",
+          "target_position": 96,
+          "question_text": "与大白鲨一起游泳",
+          "question_creator": "Sean"
+        },
+        {
+          "id": "sean_010",
+          "topic_pair": "矮小 ↔ 高大",
+          "target_position": 91,
+          "question_text": "埃菲尔铁塔",
+          "question_creator": "Sean"
+        }
+      ]
+    },
+    "Charles": {
+      "name": "Charles",
+      "description": "思考型题目专家",
+      "questions": [
+        {
+          "id": "charles_001",
+          "topic_pair": "无用发明 ↔ 必需发明",
+          "target_position": 71,
+          "question_text": "冰箱",
+          "question_creator": "Charles"
+        },
+        {
+          "id": "charles_002",
+          "topic_pair": "容易学 ↔ 难以学习",
+          "target_position": 68,
+          "question_text": "弹钢琴",
+          "question_creator": "Charles"
+        },
+        {
+          "id": "charles_003",
+          "topic_pair": "可忘记 ↔ 难忘的",
+          "target_position": 77,
+          "question_text": "你的初吻",
+          "question_creator": "Charles"
+        },
+        {
+          "id": "charles_004",
+          "topic_pair": "虚构 ↔ 真实",
+          "target_position": 58,
+          "question_text": "独角兽（古代文献中描述的动物）",
+          "question_creator": "Charles"
+        },
+        {
+          "id": "charles_005",
+          "topic_pair": "被低估 ↔ 被高估",
+          "target_position": 64,
+          "question_text": "披头士乐队",
+          "question_creator": "Charles"
+        },
+        {
+          "id": "charles_006",
+          "topic_pair": "简单 ↔ 复杂",
+          "target_position": 73,
+          "question_text": "人类大脑",
+          "question_creator": "Charles"
+        },
+        {
+          "id": "charles_007",
+          "topic_pair": "确定 ↔ 不确定",
+          "target_position": 44,
+          "question_text": "明天地球上某处会下雨",
+          "question_creator": "Charles"
+        },
+        {
+          "id": "charles_008",
+          "topic_pair": "浪费时间 ↔ 有生产力",
+          "target_position": 38,
+          "question_text": "刷社交媒体",
+          "question_creator": "Charles"
+        },
+        {
+          "id": "charles_009",
+          "topic_pair": "自然 ↔ 人工",
+          "target_position": 52,
+          "question_text": "城市中心的公园",
+          "question_creator": "Charles"
+        },
+        {
+          "id": "charles_010",
+          "topic_pair": "道德正确 ↔ 道德错误",
+          "target_position": 67,
+          "question_text": "为保护别人感受而撒谎",
+          "question_creator": "Charles"
+        }
+      ]
+    },
+    "Brus": {
+      "name": "Brus",
+      "description": "哲学与深度思考者",
+      "questions": [
+        {
+          "id": "brus_001",
+          "topic_pair": "客观真实 ↔ 客观虚假",
+          "target_position": 47,
+          "question_text": "自由意志存在",
+          "question_creator": "Brus"
+        },
+        {
+          "id": "brus_002",
+          "topic_pair": "人人喜爱 ↔ 人人讨厌",
+          "target_position": 83,
+          "question_text": "闹钟的声音",
+          "question_creator": "Brus"
+        },
+        {
+          "id": "brus_003",
+          "topic_pair": "技能 ↔ 运气",
+          "target_position": 56,
+          "question_text": "赢得德州扑克",
+          "question_creator": "Brus"
+        },
+        {
+          "id": "brus_004",
+          "topic_pair": "艺术 ↔ 非艺术",
+          "target_position": 62,
+          "question_text": "用胶带把香蕉贴在墙上（售价12万美元）",
+          "question_creator": "Brus"
+        },
+        {
+          "id": "brus_005",
+          "topic_pair": "需要政府监管 ↔ 不需要监管",
+          "target_position": 71,
+          "question_text": "人工智能开发",
+          "question_creator": "Brus"
+        },
+        {
+          "id": "brus_006",
+          "topic_pair": "天性 ↔ 培养",
+          "target_position": 54,
+          "question_text": "人类智力",
+          "question_creator": "Brus"
+        },
+        {
+          "id": "brus_007",
+          "topic_pair": "应该存在 ↔ 不应该存在",
+          "target_position": 59,
+          "question_text": "亿万富翁",
+          "question_creator": "Brus"
+        },
+        {
+          "id": "brus_008",
+          "topic_pair": "已解决问题 ↔ 未解决问题",
+          "target_position": 42,
+          "question_text": "意识",
+          "question_creator": "Brus"
+        },
+        {
+          "id": "brus_009",
+          "topic_pair": "帮助人类 ↔ 伤害人类",
+          "target_position": 48,
+          "question_text": "社交媒体平台",
+          "question_creator": "Brus"
+        },
+        {
+          "id": "brus_010",
+          "topic_pair": "永恒 ↔ 10年后将被遗忘",
+          "target_position": 37,
+          "question_text": "加密货币",
+          "question_creator": "Brus"
+        }
+      ]
+    }
   }
 }

@@ -1,5 +1,5 @@
 // -------------------------
-// 🎮 单人模式 - Wavelength
+// 🎮 单人模式 - Wavelength (简化版)
 // -------------------------
 
 // Firebase 配置（与多人模式共享）
@@ -21,11 +21,14 @@ const database = firebase.database();
 // -------------------------
 let questionBank = null;
 let currentQuestion = null;
-let currentDifficulty = "easy";
+let currentCreator = "Sean";
 let sessionId = generateSessionId();
-let playerScore = 0;
-let questionsAnswered = 0;
 let startTime = null;
+let isCreatorMode = false; // 是否处于"我也来出题"模式
+let creatorModeQuestions = []; // 存储玩家未见过的题目
+let creatorName = ""; // 玩家出题者名字
+let createdQuestionsCount = 0; // 已出题数量
+const MAX_CREATOR_QUESTIONS = 3; // 最多出3道题
 
 // -------------------------
 // 🎯 游戏核心函数
@@ -49,162 +52,102 @@ async function loadQuestionBank() {
 }
 
 // 开始游戏
-async function startGame(difficulty = "easy") {
+async function startGame(creator = "Sean") {
 	if (!questionBank) {
 		await loadQuestionBank();
 	}
 
-	currentDifficulty = difficulty;
-	playerScore = 0;
-	questionsAnswered = 0;
+	currentCreator = creator;
 	sessionId = generateSessionId();
+	isCreatorMode = false;
 
-	// 隐藏难度选择，显示游戏区域
-	document.getElementById("difficulty-selection").style.display = "none";
+	// 隐藏出题者选择，显示游戏区域
+	document.getElementById("creator-selection").style.display = "none";
 	document.getElementById("game-area").style.display = "block";
-	document.getElementById("score-display").style.display = "block";
+	document.getElementById("creator-controls").style.display = "none"; // 隐藏切换按钮
 
-	loadNextQuestion();
-}
-
-// 加载下一题
-function loadNextQuestion() {
-	if (!questionBank) return;
-
-	const questions = questionBank.questions[currentDifficulty];
-	if (!questions || questions.length === 0) {
-		alert("该难度没有题目！");
-		return;
-	}
-
-	// 随机选择一道题
-	currentQuestion = questions[Math.floor(Math.random() * questions.length)];
-	startTime = Date.now();
-
-	// 更新UI
-	document.getElementById("left-label").innerText = currentQuestion.topic_pair.split(
-		" ↔ "
-	)[0];
-	document.getElementById("right-label").innerText = currentQuestion.topic_pair.split(
-		" ↔ "
-	)[1];
-	document.getElementById("question-text").innerText =
-		currentQuestion.question_text;
-	document.getElementById("guessSlider").value = 50;
-
-	// 隐藏结果区域
-	document.getElementById("result-section").style.display = "none";
-	document.getElementById("guess-section").style.display = "block";
-	document.getElementById("feedback-survey").style.display = "none";
-
-	// 重绘画布
-	drawArc(false, false);
-}
-
-// 提交猜测
-function submitGuess() {
-	const guess = parseInt(document.getElementById("guessSlider").value);
-	const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
-
-	// 计算准确度
-	const difference = Math.abs(guess - currentQuestion.target_position);
-	const accuracyScore = Math.max(0, 100 - difference);
-
-	// 判断结果
-	let result = "";
-	let scoreEarned = 0;
-
-	const zoneSize = Math.floor(
-		(currentQuestion.range_hint[1] - currentQuestion.range_hint[0]) / 3
-	);
-	const perfectStart = currentQuestion.range_hint[0] + zoneSize;
-	const perfectEnd = currentQuestion.range_hint[1] - zoneSize;
-
-	if (
-		guess >= perfectStart &&
-		guess <= perfectEnd &&
-		guess >= currentQuestion.range_hint[0] &&
-		guess <= currentQuestion.range_hint[1]
-	) {
-		result = "💯 完美命中！太神啦！";
-		scoreEarned = 100;
-
-		// 🎉 视觉礼炮特效
-		confetti({
-			particleCount: 100,
-			spread: 80,
-			origin: { y: 0.6 },
-		});
-
-		// 🔊 播放音效
-		const celebrateSound = document.getElementById("celebrateSound");
-		celebrateSound.currentTime = 0;
-		celebrateSound.play();
-	} else if (
-		guess >= currentQuestion.range_hint[0] &&
-		guess <= currentQuestion.range_hint[1]
-	) {
-		result = "✅ 不错！在合理范围内！";
-		scoreEarned = 60;
-	} else if (difference <= 20) {
-		result = `😊 接近了！差了 ${difference} 分`;
-		scoreEarned = 30;
+	// 如果是玩家题库，从 Firebase 加载
+	if (creator === "Players") {
+		loadPlayerQuestions();
 	} else {
-		result = `😢 没猜中！差距较大（${difference} 分）`;
-		scoreEarned = 10;
+		// 显示创作者描述
+		const creatorDesc = t(`creatorDesc.${creator}`);
+		document.getElementById("current-creator").innerText = `${t('creatorLabel')}${creator}`;
+		document.getElementById("game-subtitle").innerHTML =
+			`<span style="color: #999; font-size: 14px;">${creatorDesc}</span><br>${t('guessWhat')} 🤔`;
+
+		loadNormalQuestion();
 	}
-
-	playerScore += scoreEarned;
-	questionsAnswered++;
-
-	// 保存数据到Firebase
-	saveGameData(guess, accuracyScore, timeTaken, null);
-
-	// 显示结果
-	displayResult(result, guess, scoreEarned);
 }
+
+// 加载玩家题库
+async function loadPlayerQuestions() {
+	document.getElementById("current-creator").innerText = `${t('creatorLabel')}${t('playerBank')}`;
+	document.getElementById("game-subtitle").innerText = `${t('guessPlayers')} 🎮`;
+	document.getElementById("creator-controls").style.display = "none";
+
+	try {
+		const snapshot = await database.ref("player_questions").once("value");
+		const data = snapshot.val();
+
+		if (!data || Object.keys(data).length === 0) {
+			alert(t('noPlayerQuestions'));
+			backToMenu();
+			return;
+		}
+
+		// 转换为数组
+		const playerQuestions = Object.values(data);
+
+		// 随机选择一道题
+		currentQuestion = playerQuestions[Math.floor(Math.random() * playerQuestions.length)];
+		startTime = Date.now();
+
+		// 更新UI
+		document.getElementById("left-label").innerText = currentQuestion.topic_pair.split(" ↔ ")[0];
+		document.getElementById("right-label").innerText = currentQuestion.topic_pair.split(" ↔ ")[1];
+		document.getElementById("question-text").innerText = currentQuestion.question_text;
+
+		// 显示玩家出题者名字（普通黑色加粗）
+		document.getElementById("current-creator").innerHTML =
+			`${t('creatorLabel')}<strong style="color: #333;">${currentQuestion.question_creator}</strong>`;
+
+		document.getElementById("guessSlider").value = 50;
+		document.getElementById("result-section").style.display = "none";
+		document.getElementById("guess-section").style.display = "block";
+		document.getElementById("feedback-survey").style.display = "none";
+
+		drawArc(false, false);
+	} catch (error) {
+		console.error("加载玩家题库失败:", error);
+		alert(t('loadFailed'));
+		backToMenu();
+	}
+}
+
+// 这些函数现在在文件末尾定义
 
 // 显示结果
-function displayResult(result, guess, scoreEarned) {
+function displayResult(emoji, result, guess) {
 	document.getElementById("guess-section").style.display = "none";
 	document.getElementById("result-section").style.display = "block";
 	document.getElementById("feedback-survey").style.display = "block";
 
+	// 简化的结果显示
 	document.getElementById("result-text").innerHTML = `
-		<h2>${result}</h2>
-		<p style="font-size: 18px; margin: 10px 0;">
-			<strong>你的猜测：</strong>${guess}<br>
-			<strong>正确位置：</strong>${currentQuestion.target_position}<br>
-			<strong>合理范围：</strong>${currentQuestion.range_hint[0]} ~ ${currentQuestion.range_hint[1]}
-		</p>
-		<p style="font-size: 16px; color: #4a64f7;">
-			<strong>本题得分：+${scoreEarned} 分</strong>
-		</p>
+		<h1 style="font-size: 48px; margin: 20px 0;">${emoji}</h1>
+		<h2 style="margin: 10px 0;">${result}</h2>
 	`;
-
-	// 更新分数显示
-	updateScoreDisplay();
 
 	// 绘制带答案的画布
 	drawArc(true, true, guess);
 }
 
-// 更新分数显示
-function updateScoreDisplay() {
-	document.getElementById("score-display").innerHTML = `
-		📊 总分: <strong>${playerScore}</strong> |
-		已答: <strong>${questionsAnswered}</strong> 题 |
-		平均: <strong>${Math.round(
-			playerScore / Math.max(1, questionsAnswered)
-		)}</strong> 分/题
-	`;
-}
-
 // 提交反馈
 function submitFeedback(rating) {
 	// 更新Firebase中的反馈
-	const lastDataKey = sessionId + "_" + (questionsAnswered - 1);
-	database.ref("singleplayer_feedback/" + lastDataKey).update({
+	const dataKey = sessionId + "_" + Date.now();
+	database.ref("singleplayer_feedback/" + dataKey).update({
 		feedback_rating: rating,
 		feedback_timestamp: new Date().toISOString(),
 	});
@@ -212,71 +155,53 @@ function submitFeedback(rating) {
 	// 显示感谢消息
 	const feedbackDiv = document.getElementById("feedback-survey");
 	if (rating === "up") {
-		feedbackDiv.innerHTML = '<p style="color: #4a64f7;">👍 感谢反馈！</p>';
+		feedbackDiv.innerHTML = `<p style="color: #4a64f7; font-size: 16px;">${t('thanksUp')}</p>`;
 	} else {
-		feedbackDiv.innerHTML = '<p style="color: #ff6f00;">👎 感谢反馈，我们会改进！</p>';
+		feedbackDiv.innerHTML = `<p style="color: #ff6f00; font-size: 16px;">${t('thanksDown')}</p>`;
 	}
 
 	setTimeout(() => {
 		feedbackDiv.style.display = "none";
-	}, 2000);
+	}, 1500);
 }
 
-// 保存游戏数据到Firebase
-function saveGameData(guess, accuracyScore, timeTaken, feedbackRating) {
-	const dataKey = sessionId + "_" + questionsAnswered;
+// 保存游戏数据到Firebase（简化版）
+function saveGameData(guess, difference, timeTaken, feedbackRating) {
+	const dataKey = sessionId + "_" + Date.now();
 
 	database.ref("singleplayer_feedback/" + dataKey).set({
 		question_id: currentQuestion.id,
 		question_text: currentQuestion.question_text,
 		topic_pair: currentQuestion.topic_pair,
-		difficulty: currentDifficulty,
+		creator: currentCreator,
 		player_guess: guess,
 		target_position: currentQuestion.target_position,
-		accuracy_score: accuracyScore,
+		difference: difference,
 		time_taken_seconds: parseFloat(timeTaken),
-		score_earned: playerScore,
 		feedback_rating: feedbackRating,
 		timestamp: new Date().toISOString(),
 		session_id: sessionId,
 	});
 }
 
-// 切换难度
-function changeDifficulty(difficulty) {
-	// 确认切换
-	if (questionsAnswered > 0) {
-		const confirmChange = confirm(
-			`当前已答 ${questionsAnswered} 题，切换难度将重置分数。确定要切换吗？`
-		);
-		if (!confirmChange) return;
-	}
-
-	currentDifficulty = difficulty;
-	playerScore = 0;
-	questionsAnswered = 0;
+// 切换出题者
+function changeCreator(creator) {
+	currentCreator = creator;
 	sessionId = generateSessionId();
 
-	// 更新难度按钮样式
-	document.querySelectorAll(".difficulty-btn").forEach((btn) => {
+	// 更新出题者按钮样式
+	document.querySelectorAll(".creator-btn").forEach((btn) => {
 		btn.classList.remove("active");
 	});
-	document.getElementById("diff-" + difficulty).classList.add("active");
+	document.getElementById("creator-" + creator).classList.add("active");
 
 	loadNextQuestion();
-	updateScoreDisplay();
 }
 
 // 返回主菜单
 function backToMenu() {
-	const confirmBack = confirm(
-		`当前分数 ${playerScore}，已答 ${questionsAnswered} 题。确定要返回主菜单吗？`
-	);
-	if (!confirmBack) return;
-
-	document.getElementById("difficulty-selection").style.display = "block";
+	document.getElementById("creator-selection").style.display = "block";
 	document.getElementById("game-area").style.display = "none";
-	document.getElementById("score-display").style.display = "none";
 }
 
 // -------------------------
@@ -298,10 +223,11 @@ function drawArc(showTarget = false, showGuess = false, guessValue = null) {
 	ctx.lineWidth = 3;
 	ctx.stroke();
 
-	// 显示目标区域
+	// 显示绿色范围区域（但不显示具体数字）
 	if (showTarget && currentQuestion) {
-		const rangeStart = currentQuestion.range_hint[0];
-		const rangeEnd = currentQuestion.range_hint[1];
+		// 计算范围：使用目标位置 ±15 作为合理范围
+		const rangeStart = Math.max(0, currentQuestion.target_position - 15);
+		const rangeEnd = Math.min(100, currentQuestion.target_position + 15);
 		const zoneSize = Math.floor((rangeEnd - rangeStart) / 3);
 
 		const zones = [
@@ -332,7 +258,7 @@ function drawArc(showTarget = false, showGuess = false, guessValue = null) {
 			ctx.stroke();
 		}
 
-		// 绘制正确答案位置（金色星星）
+		// 显示目标位置（金色星星）
 		const targetAngle =
 			Math.PI + Math.PI * (currentQuestion.target_position / 100);
 		const targetX = cx + r * Math.cos(targetAngle);
@@ -347,7 +273,7 @@ function drawArc(showTarget = false, showGuess = false, guessValue = null) {
 		ctx.stroke();
 	}
 
-	// 显示玩家猜测
+	// 显示玩家猜测（红色圆点）
 	if (showGuess && guessValue !== null) {
 		const angle = Math.PI + Math.PI * (guessValue / 100);
 		const x = cx + r * Math.cos(angle);
@@ -387,6 +313,238 @@ arcCanvas.addEventListener("click", (e) => {
 		drawArc(false, true, guessPercent);
 	}
 });
+
+// -------------------------
+// 🎨 "我也来出题" 功能
+// -------------------------
+
+// 启动创作者模式 - 先询问名字
+function startCreatorMode() {
+	const name = prompt(t('enterName'));
+	if (!name || name.trim() === "") {
+		alert(t('nameRequired'));
+		return;
+	}
+
+	creatorName = name.trim();
+	isCreatorMode = true;
+	createdQuestionsCount = 0;
+
+	// 收集所有题目并随机选择3道
+	const allQuestions = [];
+	Object.keys(questionBank.creators).forEach(creator => {
+		questionBank.creators[creator].questions.forEach(q => {
+			allQuestions.push({...q, originalCreator: creator});
+		});
+	});
+
+	// 随机打乱并只取3道题
+	const shuffled = allQuestions.sort(() => Math.random() - 0.5);
+	creatorModeQuestions = shuffled.slice(0, MAX_CREATOR_QUESTIONS);
+
+	document.getElementById("creator-selection").style.display = "none";
+	document.getElementById("game-area").style.display = "block";
+	document.getElementById("current-creator").innerText = `${t('creatorLabel')}${creatorName}`;
+	document.getElementById("game-subtitle").innerText = t('markPosition');
+	document.getElementById("creator-controls").style.display = "none";
+
+	loadCreatorQuestion();
+}
+
+// 加载创作者模式题目
+function loadCreatorQuestion() {
+	if (creatorModeQuestions.length === 0 || createdQuestionsCount >= MAX_CREATOR_QUESTIONS) {
+		showCreatorThankYou();
+		return;
+	}
+
+	currentQuestion = creatorModeQuestions.shift();
+	startTime = Date.now();
+
+	// 更新UI
+	document.getElementById("left-label").innerText = currentQuestion.topic_pair.split(" ↔ ")[0];
+	document.getElementById("right-label").innerText = currentQuestion.topic_pair.split(" ↔ ")[1];
+	document.getElementById("question-text").innerText = currentQuestion.question_text;
+	document.getElementById("guessSlider").value = 50;
+
+	// 显示进度
+	document.getElementById("guess-instruction").innerText =
+		t('progress', {current: createdQuestionsCount + 1, total: MAX_CREATOR_QUESTIONS});
+
+	document.getElementById("result-section").style.display = "none";
+	document.getElementById("guess-section").style.display = "block";
+	document.getElementById("feedback-survey").style.display = "none";
+
+	drawArc(false, false);
+}
+
+// 提交创作者模式的范围
+function submitCreatorGuess() {
+	const targetPosition = parseInt(document.getElementById("guessSlider").value);
+	const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
+
+	createdQuestionsCount++;
+
+	// 保存到 Firebase - 作为新题目
+	const questionId = `player_${creatorName}_${Date.now()}`;
+	database.ref("player_questions/" + questionId).set({
+		id: questionId,
+		topic_pair: currentQuestion.topic_pair,
+		target_position: targetPosition,
+		question_text: currentQuestion.question_text,
+		question_creator: creatorName,
+		created_at: new Date().toISOString(),
+		session_id: sessionId,
+		original_question_id: currentQuestion.id,
+		original_creator: currentQuestion.originalCreator,
+		time_taken_seconds: parseFloat(timeTaken),
+	});
+
+	// 显示确认
+	document.getElementById("result-text").innerHTML = `
+		<h2 style="margin: 20px 0;">${t('recorded', {count: createdQuestionsCount})}</h2>
+		<p style="font-size: 16px; color: #666;">${t('continuing')}</p>
+	`;
+
+	document.getElementById("guess-section").style.display = "none";
+	document.getElementById("result-section").style.display = "block";
+
+	// 1秒后自动进入下一题
+	setTimeout(() => {
+		loadCreatorQuestion();
+	}, 1000);
+}
+
+// 显示感谢页面
+function showCreatorThankYou() {
+	document.getElementById("result-text").innerHTML = `
+		<h1 style="font-size: 42px; margin: 20px 0;">🎉</h1>
+		<h2 style="margin: 20px 0;">${t('thanksForCreating')}</h2>
+		<p style="font-size: 18px; color: #4a64f7; margin: 15px 0;">
+			${t('willAppear', {name: `<strong>${creatorName}</strong>`})}
+		</p>
+		<p style="font-size: 16px; color: #666; margin: 10px 0;">
+			${t('completed', {count: MAX_CREATOR_QUESTIONS})}
+		</p>
+	`;
+
+	document.getElementById("guess-section").style.display = "none";
+	document.getElementById("result-section").style.display = "block";
+	document.getElementById("feedback-survey").style.display = "none";
+
+	// 改变"下一题"按钮为"返回主菜单"
+	const nextBtn = document.querySelector("#result-section .button-9");
+	if (nextBtn) {
+		nextBtn.innerText = t('returnHome');
+		nextBtn.onclick = () => {
+			isCreatorMode = false;
+			backToMenu();
+		};
+	}
+}
+
+// 包装 submitGuess 以支持创作者模式
+window.submitGuess = function() {
+	if (isCreatorMode) {
+		submitCreatorGuess();
+	} else {
+		submitNormalGuess();
+	}
+}
+
+// 包装 loadNextQuestion 以支持创作者模式和玩家题库
+window.loadNextQuestion = function() {
+	if (isCreatorMode) {
+		loadCreatorQuestion();
+	} else if (currentCreator === "Players") {
+		loadPlayerQuestions();
+	} else {
+		loadNormalQuestion();
+	}
+}
+
+// 原始的提交猜测函数（重命名）
+function submitNormalGuess() {
+	const guess = parseInt(document.getElementById("guessSlider").value);
+	const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
+
+	// 计算准确度
+	const difference = Math.abs(guess - currentQuestion.target_position);
+
+	// 判断结果 - 简化版，不显示具体数值
+	let result = "";
+	let resultEmoji = "";
+
+	if (difference <= 5) {
+		result = t('perfect');
+		resultEmoji = "💯";
+
+		// 🎉 视觉礼炮特效
+		confetti({
+			particleCount: 100,
+			spread: 80,
+			origin: { y: 0.6 },
+		});
+
+		// 🔊 播放音效
+		const celebrateSound = document.getElementById("celebrateSound");
+		celebrateSound.currentTime = 0;
+		celebrateSound.play();
+	} else if (difference <= 15) {
+		result = t('veryClose');
+		resultEmoji = "✅";
+	} else if (difference <= 25) {
+		result = t('notBad');
+		resultEmoji = "😊";
+	} else {
+		result = t('tooFar');
+		resultEmoji = "😢";
+	}
+
+	// 保存数据到Firebase（简化版）
+	saveGameData(guess, difference, timeTaken, null);
+
+	// 显示结果
+	displayResult(resultEmoji, result, guess);
+}
+
+// 原始的加载下一题函数（重命名）
+function loadNormalQuestion() {
+	if (!questionBank) return;
+
+	const questions = questionBank.creators[currentCreator].questions;
+	if (!questions || questions.length === 0) {
+		alert("该出题者没有题目！");
+		return;
+	}
+
+	// 随机选择一道题
+	currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+	startTime = Date.now();
+
+	// 更新UI
+	document.getElementById("left-label").innerText = currentQuestion.topic_pair.split(
+		" ↔ "
+	)[0];
+	document.getElementById("right-label").innerText = currentQuestion.topic_pair.split(
+		" ↔ "
+	)[1];
+	document.getElementById("question-text").innerText =
+		currentQuestion.question_text;
+	document.getElementById("guessSlider").value = 50;
+
+	// 显示当前出题者
+	document.getElementById("current-creator").innerText =
+		`${t('creatorLabel')}${currentCreator}`;
+
+	// 隐藏结果区域
+	document.getElementById("result-section").style.display = "none";
+	document.getElementById("guess-section").style.display = "block";
+	document.getElementById("feedback-survey").style.display = "none";
+
+	// 重绘画布
+	drawArc(false, false);
+}
 
 // -------------------------
 // 🚀 页面加载时初始化

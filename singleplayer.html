@@ -3,13 +3,13 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Wavelength 单人模式</title>
+  <title>Wavelength - 一个人也能玩</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+XiaoWei&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+XiaoWei&family=Pacifico&family=Orbitron:wght@700&family=Caveat:wght@700&display=swap"
     rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
@@ -22,44 +22,109 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    /* 单人模式专属样式 */
-    #difficulty-selection {
+    /* 单人模式简化样式 */
+    #creator-selection {
       margin: 30px 0;
     }
 
-    .difficulty-btn {
+    /* Sean - 优雅蓝色 */
+    .creator-btn.sean {
+      background: linear-gradient(135deg, #4a90e2 0%, #67b3f5 100%);
+      font-family: 'Pacifico', cursive;
+      font-size: 22px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .creator-btn.sean:hover {
+      background: linear-gradient(135deg, #3a7fc2 0%, #57a3e5 100%);
+      transform: translateY(-3px) scale(1.05) rotate(-2deg);
+    }
+
+    /* Charles - 深紫色 */
+    .creator-btn.charles {
+      background: linear-gradient(135deg, #7b68ee 0%, #9b88ff 100%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      letter-spacing: 2px;
+    }
+
+    .creator-btn.charles:hover {
+      background: linear-gradient(135deg, #6b58de 0%, #8b78ef 100%);
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    /* Brus - 橙红色 */
+    .creator-btn.brus {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ffa06b 100%);
+      font-family: 'Caveat', cursive;
+      font-size: 26px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .creator-btn.brus:hover {
+      background: linear-gradient(135deg, #ef5b5b 0%, #ff906b 100%);
+      transform: translateY(-3px) scale(1.05) rotate(2deg);
+    }
+
+    /* 玩家题库 - 绿色 */
+    .creator-btn.players {
+      background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 20px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      font-weight: 700;
+    }
+
+    .creator-btn.players:hover {
+      background: linear-gradient(135deg, #42b40a 0%, #63c12d 100%);
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    /* 我也来出题 - 特殊样式 */
+    .creator-btn.my-turn {
+      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+      font-family: 'ZCOOL XiaoWei', cursive;
+      font-size: 20px;
+      color: #333;
+      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+      border: 3px solid #ffaa00;
+      animation: pulse-gold 2s ease-in-out infinite;
+    }
+
+    .creator-btn.my-turn:hover {
+      background: linear-gradient(135deg, #ffcc00 0%, #ffdd3e 100%);
+      transform: translateY(-3px) scale(1.08);
+      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.6);
+    }
+
+    @keyframes pulse-gold {
+      0%,
+      100% {
+        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+      }
+
+      50% {
+        box-shadow: 0 6px 25px rgba(255, 215, 0, 0.7);
+      }
+    }
+
+    .creator-btn {
       margin: 10px;
       padding: 15px 30px;
       font-size: 18px;
       width: 150px;
       height: auto !important;
-      background: linear-gradient(135deg, #4a64f7 0%, #6a82f7 100%);
       transition: all 0.3s ease;
-    }
-
-    .difficulty-btn:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 8px 25px rgba(74, 100, 247, 0.5);
-    }
-
-    .difficulty-btn.active {
-      background: linear-gradient(135deg, #ff6f00 0%, #ff9966 100%);
+      border-radius: 12px;
     }
 
     #game-area {
       display: none;
-    }
-
-    #score-display {
-      display: none;
-      background: linear-gradient(135deg, #4a64f7 0%, #6a82f7 100%);
-      color: white;
-      padding: 15px;
-      border-radius: 12px;
-      margin: 20px 0;
-      font-size: 16px;
-      font-weight: 600;
-      box-shadow: 0 4px 15px rgba(74, 100, 247, 0.4);
     }
 
     #question-text {
@@ -72,7 +137,6 @@
       margin: 20px 0;
       box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4);
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      animation: pulse 2s ease-in-out infinite;
     }
 
     #result-section {
@@ -84,8 +148,6 @@
       display: none;
       margin: 20px 0;
       padding: 15px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
     }
 
     .feedback-btn {
@@ -127,14 +189,14 @@
       transform: translateY(-2px);
     }
 
-    .difficulty-controls {
+    .creator-controls {
       margin: 20px 0;
       display: flex;
       justify-content: center;
       gap: 10px;
     }
 
-    .small-difficulty-btn {
+    .small-creator-btn {
       padding: 8px 16px;
       font-size: 14px;
       width: auto;
@@ -142,11 +204,29 @@
       background: rgba(74, 100, 247, 0.2);
       color: #4a64f7;
       border: 2px solid #4a64f7;
+      border-radius: 8px;
+      transition: all 0.3s ease;
     }
 
-    .small-difficulty-btn.active {
+    .small-creator-btn.active {
       background: #4a64f7;
       color: white;
+    }
+
+    /* 小按钮也应用出题者颜色 */
+    .small-creator-btn.sean.active {
+      background: #4a90e2;
+      border-color: #4a90e2;
+    }
+
+    .small-creator-btn.charles.active {
+      background: #7b68ee;
+      border-color: #7b68ee;
+    }
+
+    .small-creator-btn.brus.active {
+      background: #ff6b6b;
+      border-color: #ff6b6b;
     }
 
     #back-to-menu {
@@ -160,6 +240,19 @@
       background: #999;
       color: white;
     }
+
+    #current-creator {
+      font-size: 14px;
+      color: #666;
+      margin: 10px 0;
+    }
+
+    #game-subtitle {
+      font-size: 18px;
+      color: #ff6f00;
+      margin: 10px 0;
+      font-weight: 600;
+    }
   </style>
 </head>
 
@@ -167,7 +260,11 @@
   <div class="container">
     <!-- 模式切换按钮 -->
     <div class="mode-switch">
-      <a href="index.html">🔄 切换到多人模式</a>
+      <a href="index.html" data-i18n="modeSwitch">🔄 切换到多人模式</a>
+      <button id="lang-switch"
+        style="margin-left: 10px; padding: 8px 15px; background: white; border: 2px solid #4a64f7; border-radius: 8px; color: #4a64f7; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
+        EN
+      </button>
     </div>
 
     <!-- 标题 -->
@@ -191,28 +288,32 @@
       </svg>
     </div>
 
-    <h2 style="margin: 10px 0; color: #4a64f7;">🎮 单人模式</h2>
+    <h2 style="margin: 10px 0; color: #4a64f7;" data-i18n="mainTitle">一个人也能玩 🎮</h2>
 
-    <!-- 难度选择 -->
-    <div id="difficulty-selection">
-      <h3>选择难度开始游戏：</h3>
-      <button class="button-9 difficulty-btn" onclick="startGame('easy')">😊 简单</button>
-      <button class="button-9 difficulty-btn" onclick="startGame('medium')">🤔 中等</button>
-      <button class="button-9 difficulty-btn" onclick="startGame('hard')">🔥 困难</button>
+    <!-- 出题者选择 -->
+    <div id="creator-selection">
+      <h3 data-i18n="selectCreator">选择出题者：</h3>
+      <button class="button-9 creator-btn sean" onclick="startGame('Sean')">Sean</button>
+      <button class="button-9 creator-btn charles" onclick="startGame('Charles')">Charles</button>
+      <button class="button-9 creator-btn brus" onclick="startGame('Brus')">Brus</button>
+      <button class="button-9 creator-btn players" onclick="startGame('Players')" data-i18n="playerBank">玩家题库</button>
+      <br>
+      <button class="button-9 creator-btn my-turn" onclick="startCreatorMode()" data-i18n="iWillCreate">✨ 我也来出题</button>
     </div>
-
-    <!-- 分数显示 -->
-    <div id="score-display"></div>
 
     <!-- 游戏区域 -->
     <div id="game-area">
-      <!-- 难度切换 -->
-      <div class="difficulty-controls">
-        <button id="diff-easy" class="button-9 small-difficulty-btn active"
-          onclick="changeDifficulty('easy')">简单</button>
-        <button id="diff-medium" class="button-9 small-difficulty-btn"
-          onclick="changeDifficulty('medium')">中等</button>
-        <button id="diff-hard" class="button-9 small-difficulty-btn" onclick="changeDifficulty('hard')">困难</button>
+      <!-- 当前出题者显示 -->
+      <div id="current-creator"></div>
+      <div id="game-subtitle">猜猜创作者怎么想 🤔</div>
+
+      <!-- 出题者切换 -->
+      <div id="creator-controls" class="creator-controls">
+        <button id="creator-Sean" class="button-9 small-creator-btn sean active"
+          onclick="changeCreator('Sean')">Sean</button>
+        <button id="creator-Charles" class="button-9 small-creator-btn charles"
+          onclick="changeCreator('Charles')">Charles</button>
+        <button id="creator-Brus" class="button-9 small-creator-btn brus" onclick="changeCreator('Brus')">Brus</button>
       </div>
 
       <!-- 题目显示 -->
@@ -227,44 +328,46 @@
 
       <!-- 猜测区域 -->
       <div id="guess-section">
-        <p style="font-size: 18px; margin: 20px 0;">📍 拖动滑条或点击弧线进行猜测</p>
+        <p id="guess-instruction" style="font-size: 16px; margin: 20px 0;" data-i18n="dragSlider">拖动滑条或点击弧线进行猜测</p>
         <input type="range" id="guessSlider" min="0" max="100" value="50">
         <br>
-        <button class="button-9" role="button" onclick="submitGuess()" style="margin-top: 15px;">👍 提交答案</button>
+        <button class="button-9" role="button" onclick="submitGuess()" style="margin-top: 15px;" data-i18n="submitAnswer">提交答案</button>
       </div>
 
       <!-- 结果区域 -->
       <div id="result-section">
         <div id="result-text"></div>
         <button class="button-9" role="button" onclick="loadNextQuestion()"
-          style="margin-top: 20px; background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);">🔁 下一题</button>
+          style="margin-top: 20px; background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);" data-i18n="nextQuestion">下一题</button>
       </div>
 
       <!-- 反馈调查 -->
       <div id="feedback-survey">
-        <p style="font-size: 16px; margin-bottom: 10px;">这道题怎么样？</p>
+        <p style="font-size: 16px; margin-bottom: 10px;" data-i18n="howWasIt">这道题怎么样？</p>
         <button class="feedback-btn" onclick="submitFeedback('up')">👍</button>
         <button class="feedback-btn" onclick="submitFeedback('down')">👎</button>
       </div>
 
       <!-- 返回按钮 -->
-      <button id="back-to-menu" class="button-9" onclick="backToMenu()">⬅️ 返回主菜单</button>
+      <button id="back-to-menu" class="button-9" onclick="backToMenu()" data-i18n="backToMenu">⬅️ 返回主菜单</button>
     </div>
   </div>
 
   <!-- 规则说明 -->
   <div style="text-align: center;">
     <div id="rules">
-      <h3 id="rules-title">单人模式规则</h3>
-      <p>1. 选择难度开始游戏</p>
-      <p>2. 查看题目，在频谱上猜测答案的位置</p>
-      <p>3. 猜得越准确，得分越高！挑战你的判断力！🎯</p>
+      <h3 id="rules-title" data-i18n="rulesTitle">游戏规则</h3>
+      <p data-i18n="rule1">1. 选择出题者，猜猜他们会怎么想</p>
+      <p data-i18n="rule2">2. 看题目后，在频谱上猜测答案位置</p>
+      <p data-i18n="rule3">3. 或者选择"我也来出题"，分享你的想法！🎨</p>
     </div>
   </div>
 
   <!-- 🎊 庆祝音效 -->
   <audio id="celebrateSound" src="assets/partypop.mp3" preload="auto"></audio>
 
+  <!-- 语言配置 -->
+  <script src="lang.js"></script>
   <!-- 游戏逻辑脚本 -->
   <script src="singleplayer.js"></script>
 </body>
