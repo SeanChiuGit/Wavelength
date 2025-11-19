@@ -35,6 +35,7 @@ const translations = {
 		howWasIt: "这道题怎么样？",
 		thanksUp: "👍 感谢！",
 		thanksDown: "👎 已记录",
+		positive: "好评",
 
 		// 我也来出题
 		enterName: "请输入你的名字（将显示为出题者）：",
@@ -57,7 +58,23 @@ const translations = {
 		rulesTitle: "游戏规则",
 		rule1: "1. 选择出题者，猜猜他们会怎么想",
 		rule2: "2. 看题目后，在频谱上猜测答案位置",
-		rule3: "3. 或者选择「我也来出题」，分享你的想法！🎨"
+		rule3: "3. 或者选择「我也来出题」，分享你的想法！🎨",
+
+		// 多人模式
+		singlePlayerMode: "🎮 单人模式",
+		multiplayerRulesTitle: "游戏规则",
+		multiplayerRule1: "1. 房主点击"创建房间"，分享房间号。",
+		multiplayerRule2: "2. 出题方输入提示词，猜测方拖动滑条猜位置。",
+		multiplayerRule3: "3. 尝试理解彼此的思路，挑战默契极限！🔥",
+		createRoom: "🛋️ 创建房间",
+		joinRoom: "🔗 加入",
+		enterRoomId: "输入房间号",
+		notConnected: "❌ 未连接",
+		connected: "✅ 已连接",
+		timeSettings: "⚙️ 时间设置",
+		hintTime: "出题时间：",
+		guessTime: "猜测时间：",
+		seconds: "秒"
 	},
 
 	en: {
@@ -95,6 +112,7 @@ const translations = {
 		howWasIt: "How was this question?",
 		thanksUp: "👍 Thanks!",
 		thanksDown: "👎 Recorded",
+		positive: "positive",
 
 		// I'll create
 		enterName: "Enter your name (will be shown as creator):",
@@ -117,7 +135,23 @@ const translations = {
 		rulesTitle: "Game Rules",
 		rule1: "1. Select a creator and guess what they think",
 		rule2: "2. After viewing the question, guess the answer position on the spectrum",
-		rule3: "3. Or select 'I'll Create' to share your thoughts! 🎨"
+		rule3: "3. Or select 'I'll Create' to share your thoughts! 🎨",
+
+		// Multiplayer mode
+		singlePlayerMode: "🎮 Single Player",
+		multiplayerRulesTitle: "Game Rules",
+		multiplayerRule1: "1. Host creates a room and shares the room code.",
+		multiplayerRule2: "2. Questioner enters hint, guesser drags slider to guess position.",
+		multiplayerRule3: "3. Try to understand each other's thoughts, challenge your connection! 🔥",
+		createRoom: "🛋️ Create Room",
+		joinRoom: "🔗 Join",
+		enterRoomId: "Enter room code",
+		notConnected: "❌ Not connected",
+		connected: "✅ Connected",
+		timeSettings: "⚙️ Time Settings",
+		hintTime: "Hint time:",
+		guessTime: "Guess time:",
+		seconds: "sec"
 	}
 };
 
@@ -156,6 +190,12 @@ function updateAllText() {
 	document.querySelectorAll('[data-i18n]').forEach(el => {
 		const key = el.getAttribute('data-i18n');
 		el.textContent = t(key);
+	});
+
+	// 更新所有带 data-i18n-placeholder 属性的元素
+	document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+		const key = el.getAttribute('data-i18n-placeholder');
+		el.placeholder = t(key);
 	});
 
 	// 更新语言切换按钮

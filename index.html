@@ -26,8 +26,9 @@
 <body>
   <div class="container">
     <!-- 模式切换按钮 -->
-    <div style="position: absolute; top: 20px; right: 20px;">
-      <a href="singleplayer.html" style="color: #4a64f7; text-decoration: none; font-weight: 600; padding: 10px 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; display: inline-block;">🎮 单人模式</a>
+    <div style="position: absolute; top: 20px; right: 20px; display: flex; gap: 10px;">
+      <a href="singleplayer.html" data-i18n="singlePlayerMode" style="color: #4a64f7; text-decoration: none; font-weight: 600; padding: 10px 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; display: inline-block;">🎮 单人模式</a>
+      <button id="lang-switch" style="padding: 10px 20px; background: white; border: 2px solid #4a64f7; border-radius: 8px; color: #4a64f7; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">EN</button>
     </div>
 
     <div id="title">
@@ -51,14 +52,14 @@
     </div>
 
     <div id="control-panel">
-      <button id="create" class="button-9" role="button" onclick="createRoom()">🛋️ 创建房间</button>
+      <button id="create" class="button-9" role="button" onclick="createRoom()" data-i18n="createRoom">🛋️ 创建房间</button>
       <div id="connection-area">
         <div id="input-row">
-          <input id="roomId" type="text" placeholder="输入房间号">
-          <button id="join" class="button-9" role="button" onclick="joinRoom()">🔗 加入</button>
+          <input id="roomId" type="text" data-i18n-placeholder="enterRoomId" placeholder="输入房间号">
+          <button id="join" class="button-9" role="button" onclick="joinRoom()" data-i18n="joinRoom">🔗 加入</button>
         </div>
         <div id="status-row">
-          <span id="connection-status">❌ 未连接</span>
+          <span id="connection-status" data-i18n="notConnected">❌ 未连接</span>
         </div>
       </div>
     </div>
@@ -124,15 +125,17 @@
   <!-- ✅ 🎊 庆祝音效 -->
   <audio id="celebrateSound" src="assets/partypop.mp3" preload="auto"></audio>
 
+  <!-- 语言配置 -->
+  <script src="lang.js"></script>
   <!-- ✅ 游戏逻辑脚本 -->
   <script src="script.js"></script>
 </body>
 <div style="text-align: center;">
   <div id="rules">
-    <h3 id="rules-title">游戏规则</h3>
-    <p>1. 房主点击“创建房间”，分享房间号。</p>
-    <p>2. 出题方输入提示词，猜测方拖动滑条猜位置。</p>
-    <p>3. 尝试理解彼此的思路，挑战默契极限！🔥</p>
+    <h3 id="rules-title" data-i18n="multiplayerRulesTitle">游戏规则</h3>
+    <p data-i18n="multiplayerRule1">1. 房主点击"创建房间"，分享房间号。</p>
+    <p data-i18n="multiplayerRule2">2. 出题方输入提示词，猜测方拖动滑条猜位置。</p>
+    <p data-i18n="multiplayerRule3">3. 尝试理解彼此的思路，挑战默契极限！🔥</p>
   </div>
 </div>
 

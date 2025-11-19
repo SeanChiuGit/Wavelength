@@ -51,6 +51,12 @@ async function loadQuestionBank() {
 	}
 }
 
+// 获取多语言文本（支持对象）
+function getLocalizedText(textObj) {
+	if (typeof textObj === 'string') return textObj;
+	return textObj[currentLang] || textObj['zh'] || textObj['en'] || '';
+}
+
 // 开始游戏
 async function startGame(creator = "Sean") {
 	if (!questionBank) {
@@ -71,7 +77,8 @@ async function startGame(creator = "Sean") {
 		loadPlayerQuestions();
 	} else {
 		// 显示创作者描述
-		const creatorDesc = t(`creatorDesc.${creator}`);
+		const creatorInfo = questionBank.creators[creator];
+		const creatorDesc = getLocalizedText(creatorInfo.description);
 		document.getElementById("current-creator").innerText = `${t('creatorLabel')}${creator}`;
 		document.getElementById("game-subtitle").innerHTML =
 			`<span style="color: #999; font-size: 14px;">${creatorDesc}</span><br>${t('guessWhat')} 🤔`;
@@ -103,10 +110,16 @@ async function loadPlayerQuestions() {
 		currentQuestion = playerQuestions[Math.floor(Math.random() * playerQuestions.length)];
 		startTime = Date.now();
 
-		// 更新UI
-		document.getElementById("left-label").innerText = currentQuestion.topic_pair.split(" ↔ ")[0];
-		document.getElementById("right-label").innerText = currentQuestion.topic_pair.split(" ↔ ")[1];
-		document.getElementById("question-text").innerText = currentQuestion.question_text;
+		// 更新UI - 使用多语言文本
+		const topicPairText = getLocalizedText(currentQuestion.topic_pair);
+		const topicParts = topicPairText.split(" ↔ ");
+		document.getElementById("left-label").innerText = topicParts[0];
+		document.getElementById("right-label").innerText = topicParts[1];
+
+		// 显示题目和评价统计
+		const questionText = getLocalizedText(currentQuestion.question_text);
+		const voteStats = await displayQuestionVotes(currentQuestion.id);
+		document.getElementById("question-text").innerHTML = questionText + voteStats;
 
 		// 显示玩家出题者名字（普通黑色加粗）
 		document.getElementById("current-creator").innerHTML =
@@ -151,6 +164,22 @@ function submitFeedback(rating) {
 		feedback_rating: rating,
 		feedback_timestamp: new Date().toISOString(),
 	});
+
+	// 更新题目的点赞/点踩统计
+	if (currentQuestion && currentQuestion.id) {
+		const voteRef = database.ref(`question_votes/${currentQuestion.id}`);
+		voteRef.transaction((votes) => {
+			if (votes === null) {
+				votes = { upvotes: 0, downvotes: 0 };
+			}
+			if (rating === "up") {
+				votes.upvotes = (votes.upvotes || 0) + 1;
+			} else {
+				votes.downvotes = (votes.downvotes || 0) + 1;
+			}
+			return votes;
+		});
+	}
 
 	// 显示感谢消息
 	const feedbackDiv = document.getElementById("feedback-survey");
@@ -352,7 +381,7 @@ function startCreatorMode() {
 }
 
 // 加载创作者模式题目
-function loadCreatorQuestion() {
+async function loadCreatorQuestion() {
 	if (creatorModeQuestions.length === 0 || createdQuestionsCount >= MAX_CREATOR_QUESTIONS) {
 		showCreatorThankYou();
 		return;
@@ -361,10 +390,17 @@ function loadCreatorQuestion() {
 	currentQuestion = creatorModeQuestions.shift();
 	startTime = Date.now();
 
-	// 更新UI
-	document.getElementById("left-label").innerText = currentQuestion.topic_pair.split(" ↔ ")[0];
-	document.getElementById("right-label").innerText = currentQuestion.topic_pair.split(" ↔ ")[1];
-	document.getElementById("question-text").innerText = currentQuestion.question_text;
+	// 更新UI - 使用多语言文本
+	const topicPairText = getLocalizedText(currentQuestion.topic_pair);
+	const topicParts = topicPairText.split(" ↔ ");
+	document.getElementById("left-label").innerText = topicParts[0];
+	document.getElementById("right-label").innerText = topicParts[1];
+
+	// 显示题目和评价统计
+	const questionText = getLocalizedText(currentQuestion.question_text);
+	const voteStats = await displayQuestionVotes(currentQuestion.id);
+	document.getElementById("question-text").innerHTML = questionText + voteStats;
+
 	document.getElementById("guessSlider").value = 50;
 
 	// 显示进度
@@ -508,8 +544,32 @@ function submitNormalGuess() {
 	displayResult(resultEmoji, result, guess);
 }
 
+// 获取并显示题目评价统计
+async function displayQuestionVotes(questionId) {
+	try {
+		const snapshot = await database.ref(`question_votes/${questionId}`).once("value");
+		const votes = snapshot.val();
+
+		if (votes && (votes.upvotes > 0 || votes.downvotes > 0)) {
+			const total = votes.upvotes + votes.downvotes;
+			const upPercent = Math.round((votes.upvotes / total) * 100);
+
+			return `<div style="font-size: 14px; color: #666; margin: 10px 0;">
+				<span style="color: #4a64f7;">👍 ${votes.upvotes}</span>
+				<span style="margin: 0 5px;">|</span>
+				<span style="color: #ff6f00;">👎 ${votes.downvotes}</span>
+				<span style="margin-left: 10px;">(${upPercent}% ${t('positive')})</span>
+			</div>`;
+		}
+		return "";
+	} catch (error) {
+		console.error("加载评价失败:", error);
+		return "";
+	}
+}
+
 // 原始的加载下一题函数（重命名）
-function loadNormalQuestion() {
+async function loadNormalQuestion() {
 	if (!questionBank) return;
 
 	const questions = questionBank.creators[currentCreator].questions;
@@ -522,15 +582,17 @@ function loadNormalQuestion() {
 	currentQuestion = questions[Math.floor(Math.random() * questions.length)];
 	startTime = Date.now();
 
-	// 更新UI
-	document.getElementById("left-label").innerText = currentQuestion.topic_pair.split(
-		" ↔ "
-	)[0];
-	document.getElementById("right-label").innerText = currentQuestion.topic_pair.split(
-		" ↔ "
-	)[1];
-	document.getElementById("question-text").innerText =
-		currentQuestion.question_text;
+	// 更新UI - 使用多语言文本
+	const topicPairText = getLocalizedText(currentQuestion.topic_pair);
+	const topicParts = topicPairText.split(" ↔ ");
+	document.getElementById("left-label").innerText = topicParts[0];
+	document.getElementById("right-label").innerText = topicParts[1];
+
+	// 显示题目和评价统计
+	const questionText = getLocalizedText(currentQuestion.question_text);
+	const voteStats = await displayQuestionVotes(currentQuestion.id);
+	document.getElementById("question-text").innerHTML = questionText + voteStats;
+
 	document.getElementById("guessSlider").value = 50;
 
 	// 显示当前出题者
