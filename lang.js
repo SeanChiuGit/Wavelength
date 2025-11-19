@@ -63,7 +63,7 @@ const translations = {
 		// 多人模式
 		singlePlayerMode: "🎮 单人模式",
 		multiplayerRulesTitle: "游戏规则",
-		multiplayerRule1: "1. 房主点击"创建房间"，分享房间号。",
+		multiplayerRule1: "1. 房主点击「创建房间」，分享房间号。",
 		multiplayerRule2: "2. 出题方输入提示词，猜测方拖动滑条猜位置。",
 		multiplayerRule3: "3. 尝试理解彼此的思路，挑战默契极限！🔥",
 		createRoom: "🛋️ 创建房间",
