@@ -83,7 +83,7 @@ const translations = {
 		// Main title
 		mainTitle: "Play Solo",
 		modeSwitch: "Switch to Multiplayer",
-		questionEditor: "📝 Question Editor",
+		questionEditor: "📝 Wavelength Editor",
 
 		// Creator selection
 		selectCreator: "Select Creator:",
@@ -157,7 +157,7 @@ const translations = {
 		timeSettings: "⚙️ Time Settings",
 		hintTime: "Hint time:",
 		guessTime: "Guess time:",
-		seconds: "sec",
+		seconds: "s",
 		loading: "Loading...",
 	},
 };

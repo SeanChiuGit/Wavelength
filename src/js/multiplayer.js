@@ -57,12 +57,12 @@ window.addEventListener("DOMContentLoaded", () => {
 // 加载词库函数
 async function loadWordBank() {
 	try {
-		const response = await fetch('../data/wordbank.json');
+		const response = await fetch("../data/wordbank.json");
 		const data = await response.json();
 		chineseWordBank = data.words;
-		console.log('✅ 词库加载成功:', chineseWordBank.length, '个词');
+		console.log("✅ 词库加载成功:", chineseWordBank.length, "个词");
 	} catch (error) {
-		console.error('❌ 词库加载失败:', error);
+		console.error("❌ 词库加载失败:", error);
 		// 如果加载失败，使用备用词库
 		chineseWordBank = ["火锅", "宇宙", "爱情", "梦境", "沙发"];
 	}
@@ -71,17 +71,17 @@ async function loadWordBank() {
 // 加载提示列表函数
 async function loadHintList() {
 	try {
-		const response = await fetch('../data/hintlist.json');
+		const response = await fetch("../data/hintlist.json");
 		const data = await response.json();
 		hintList = data.hints;
-		console.log('✅ 提示列表加载成功:', hintList.length, '对提示');
+		console.log("✅ 提示列表加载成功:", hintList.length, "对提示");
 	} catch (error) {
-		console.error('❌ 提示列表加载失败:', error);
+		console.error("❌ 提示列表加载失败:", error);
 		// 如果加载失败，使用备用提示列表
 		hintList = [
 			{ left: "冷", right: "热" },
 			{ left: "好吃", right: "难吃" },
-			{ left: "开心", right: "难过" }
+			{ left: "开心", right: "难过" },
 		];
 	}
 }
@@ -91,7 +91,8 @@ function updateTimeDisplay(type) {
 	if (type === "hint") {
 		const value = document.getElementById("hintTime").value;
 		hintTimeLimit = parseInt(value);
-		document.getElementById("hintTimeDisplay").textContent = value + t('seconds');
+		document.getElementById("hintTimeDisplay").textContent =
+			value + t("seconds");
 
 		// 同步到 Firebase（只有房主需要同步）
 		if (playerRole === "host" && currentRoomId) {
@@ -102,7 +103,8 @@ function updateTimeDisplay(type) {
 	} else if (type === "guess") {
 		const value = document.getElementById("guessTime").value;
 		guessTimeLimit = parseInt(value);
-		document.getElementById("guessTimeDisplay").textContent = value + t('seconds');
+		document.getElementById("guessTimeDisplay").textContent =
+			value + t("seconds");
 
 		// 同步到 Firebase（只有房主需要同步）
 		if (playerRole === "host" && currentRoomId) {
