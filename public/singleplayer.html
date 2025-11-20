@@ -12,7 +12,7 @@
     href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+XiaoWei&family=Pacifico&family=Orbitron:wght@700&family=Caveat:wght@700&display=swap"
     rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="../src/css/style.css">
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -166,27 +166,153 @@
       border-color: #4a64f7;
     }
 
-    .mode-switch {
-      position: absolute;
+    .nav-container {
+      position: fixed;
       top: 20px;
       right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: calc(100% - 40px);
     }
 
-    .mode-switch a {
+    .nav-button {
       color: #4a64f7;
       text-decoration: none;
       font-weight: 600;
       padding: 10px 20px;
       background: white;
+      border: none;
       border-radius: 8px;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       transition: all 0.3s ease;
+      display: inline-block;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+      white-space: nowrap;
     }
 
-    .mode-switch a:hover {
-      background: #4a64f7;
-      color: white;
+    .nav-button:hover {
+      color: #667eea;
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(74, 100, 247, 0.2);
+    }
+
+    .nav-button.lang-btn {
+      border: 2px solid #4a64f7;
+    }
+
+    /* 汉堡菜单按钮 */
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      background: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      width: 44px;
+      height: 44px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 24px;
+      height: 3px;
+      background: #4a64f7;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .menu-toggle.active span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .menu-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .menu-toggle.active span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* 平板尺寸 */
+    @media (max-width: 768px) {
+      .nav-container {
+        top: 10px;
+        right: 10px;
+        gap: 8px;
+        max-width: calc(100% - 20px);
+      }
+
+      .nav-button {
+        padding: 8px 15px;
+        font-size: 13px;
+      }
+
+      .menu-toggle {
+        top: 10px;
+        right: 10px;
+      }
+    }
+
+    /* 手机尺寸 - 汉堡菜单 */
+    @media (max-width: 480px) {
+      .menu-toggle {
+        display: flex;
+      }
+
+      .nav-container {
+        position: fixed;
+        top: 64px;
+        right: 10px;
+        left: auto;
+        flex-direction: column;
+        gap: 8px;
+        width: 200px;
+        max-width: calc(100vw - 20px);
+        background: white;
+        padding: 10px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+      }
+
+      .nav-container.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .nav-button {
+        padding: 12px 16px;
+        font-size: 14px;
+        width: 100%;
+        text-align: left;
+        display: block;
+        box-sizing: border-box;
+        margin: 0;
+      }
+
+      .nav-button.lang-btn {
+        border: 2px solid #4a64f7;
+        box-sizing: border-box;
+      }
     }
 
     .creator-controls {
@@ -257,15 +383,21 @@
 </head>
 
 <body>
+  <!-- 汉堡菜单按钮 -->
+  <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- 导航按钮 -->
+  <div class="nav-container" id="nav-container">
+    <a href="index.html" data-i18n="modeSwitch" class="nav-button">🔄 多人模式</a>
+    <a href="question-editor.html" class="nav-button">📝 题库编辑</a>
+    <button id="lang-switch" class="nav-button lang-btn">EN</button>
+  </div>
+
   <div class="container">
-    <!-- 模式切换按钮 -->
-    <div class="mode-switch">
-      <a href="index.html" data-i18n="modeSwitch">🔄 切换到多人模式</a>
-      <button id="lang-switch"
-        style="margin-left: 10px; padding: 8px 15px; background: white; border: 2px solid #4a64f7; border-radius: 8px; color: #4a64f7; cursor: pointer; font-weight: 600; transition: all 0.3s ease;">
-        EN
-      </button>
-    </div>
 
     <!-- 标题 -->
     <div id="title">
@@ -364,12 +496,42 @@
   </div>
 
   <!-- 🎊 庆祝音效 -->
-  <audio id="celebrateSound" src="assets/partypop.mp3" preload="auto"></audio>
+  <audio id="celebrateSound" src="assets/audio/partypop.mp3" preload="auto"></audio>
+
+  <!-- 汉堡菜单脚本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.getElementById('menu-toggle');
+      const navContainer = document.getElementById('nav-container');
+
+      menuToggle.addEventListener('click', function() {
+        menuToggle.classList.toggle('active');
+        navContainer.classList.toggle('active');
+      });
+
+      // 点击菜单项后关闭菜单
+      const navButtons = navContainer.querySelectorAll('.nav-button');
+      navButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          menuToggle.classList.remove('active');
+          navContainer.classList.remove('active');
+        });
+      });
+
+      // 点击菜单外部关闭菜单
+      document.addEventListener('click', function(event) {
+        if (!menuToggle.contains(event.target) && !navContainer.contains(event.target)) {
+          menuToggle.classList.remove('active');
+          navContainer.classList.remove('active');
+        }
+      });
+    });
+  </script>
 
   <!-- 语言配置 -->
-  <script src="lang.js"></script>
+  <script src="../src/js/lang.js"></script>
   <!-- 游戏逻辑脚本 -->
-  <script src="singleplayer.js"></script>
+  <script src="../src/js/singleplayer.js"></script>
 </body>
 
 </html>

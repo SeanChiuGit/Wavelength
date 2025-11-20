@@ -42,9 +42,25 @@ function generateSessionId() {
 // 加载题库
 async function loadQuestionBank() {
 	try {
-		const response = await fetch("question_bank.json");
+		// 首先尝试从 localStorage 加载（question-editor 编辑的内容）
+		const localData = localStorage.getItem('wavelength_db_v2');
+		if (localData) {
+			try {
+				const parsed = JSON.parse(localData);
+				if (parsed.creators && Object.keys(parsed.creators).length > 0) {
+					questionBank = parsed;
+					console.log("✅ 题库从本地存储加载成功:", questionBank.total_questions, "道题");
+					return;
+				}
+			} catch (e) {
+				console.warn("本地存储数据解析失败，尝试从文件加载");
+			}
+		}
+
+		// 如果本地没有数据，从 JSON 文件加载
+		const response = await fetch("../data/question_bank.json");
 		questionBank = await response.json();
-		console.log("✅ 题库加载成功:", questionBank.total_questions, "道题");
+		console.log("✅ 题库从文件加载成功:", questionBank.total_questions, "道题");
 	} catch (error) {
 		console.error("❌ 题库加载失败:", error);
 		alert("题库加载失败，请刷新页面重试！");

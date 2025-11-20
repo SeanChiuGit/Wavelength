@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wavelength Studio</title>
+    <style>
+        :root {
+            --bg-base: #f3f4f6;
+            --surface: rgba(255, 255, 255, 0.9);
+            --surface-hover: #ffffff;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.3);
+            --text-main: #111827;
+            --text-sub: #4b5563;
+            --text-muted: #9ca3af;
+            --border: rgba(0, 0, 0, 0.08);
+            /* The Game Spectrum Gradient */
+            --spectrum-gradient: linear-gradient(90deg, #38bdf8 0%, #e2e8f0 50%, #f472b6 100%);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --ease-spring: cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Scoring Zone Colors */
+            --zone-4: #175E68;
+            /* Bullseye (Teal/Dark) */
+            --zone-3: #3E9FA0;
+            /* 3 Points */
+            --zone-2: #D97D3E;
+            /* 2 Points (Orange) */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* Background Mesh */
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background:
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.1) 0px, transparent 50%);
+            filter: blur(60px);
+        }
+
+        /* --- Header --- */
+        header {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 16px 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-back {
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.04);
+            border-radius: 50px;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: white;
+            transform: translateX(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* --- Toolbar --- */
+        .toolbar {
+            margin: 32px 0;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .glass-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .glass-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .glass-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .btn {
+            border: none;
+            padding: 0 20px;
+            height: 44px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.1s, box-shadow 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-primary {
+            background: var(--text-main);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        /* --- Grid --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.1);
+            z-index: 2;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: #eef2ff;
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+            font-weight: 400;
+        }
+
+        .spectrum-wrap {
+            margin-top: auto;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 12px;
+            border-radius: var(--radius-md);
+        }
+
+        .spectrum-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+        }
+
+        .spectrum-zh {
+            display: flex !important;
+            justify-content: space-between;
+            display: block;
+            font-weight: 400;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            margin-top: 2px;
+        }
+
+        .spectrum-bar {
+            height: 6px;
+            background: var(--spectrum-gradient);
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .spectrum-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 2px solid var(--text-main);
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .card:hover .card-actions {
+            opacity: 1;
+        }
+
+        .btn-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-edit {
+            background: #e0e7ff;
+            color: var(--primary);
+        }
+
+        .btn-del {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        /* --- Modal & Visualization --- */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 95%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .dual-input {
+            display: flex;
+            gap: 12px;
+        }
+
+        .dual-input>div {
+            flex: 1;
+        }
+
+        .lang-tag {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        /* Game Visualizer Container */
+        .game-dial-container {
+            background: #f1f5f9;
+            padding: 24px;
+            border-radius: 24px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        /* The "Board" Background */
+        .dial-board {
+            height: 40px;
+            background: var(--spectrum-gradient);
+            border-radius: 20px;
+            position: relative;
+            margin: 10px 0 30px 0;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* The Moving Target "Wedge" */
+        .dial-target-wedge {
+            position: absolute;
+            top: -5px;
+            bottom: -5px;
+            width: 40px;
+            /* Width of the entire scoring zone */
+            transform: translateX(-50%);
+            /* Center on the value */
+            z-index: 10;
+            pointer-events: none;
+            /* Let clicks pass through to slider if needed */
+
+            /* Visual styling of the scoring container */
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+
+            /* Shadow to make it pop off the board */
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Scoring Zones inside the Wedge */
+        .zone-layer {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-radius: 4px;
+        }
+
+        .zone-2 {
+            width: 100%;
+            background-color: var(--zone-2);
+            z-index: 1;
+            border-radius: 20px;
+            /* Rounded outer edges */
+        }
+
+        .zone-3 {
+            width: 60%;
+            background-color: var(--zone-3);
+            z-index: 2;
+            left: 20%;
+        }
+
+        .zone-4 {
+            width: 25%;
+            background-color: var(--zone-4);
+            z-index: 3;
+            left: 37.5%;
+            /* White tick mark in center */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zone-4::after {
+            content: '';
+            width: 2px;
+            height: 60%;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .dial-value-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Custom Slider Styling */
+        input[type=range] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #cbd5e1;
+            outline: none;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 0 4px white, 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.1s;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        /* --- Empty State --- */
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-muted);
+            display: none;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="mesh-bg"></div>
+
+    <header>
+        <div class="container header-inner">
+            <a href="index.html" class="btn-back">← Back to Home</a>
+            <div class="brand"><span>Wavelength Editor</span></div>
+            <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-sub);">
+                <span id="total-count">0</span> items
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="toolbar">
+            <div style="flex: 2; min-width: 200px;">
+                <input type="text" id="search" class="glass-input" placeholder="Search English or Chinese text..."
+                    oninput="app.filter()">
+            </div>
+            <div style="flex: 1; min-width: 180px;">
+                <select id="filter-creator" class="glass-input glass-select" onchange="app.filter()">
+                    <option value="">All Creators</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px; margin-left: auto;">
+                <button class="btn btn-secondary" onclick="io.export()">Export JSON</button>
+                <button class="btn btn-secondary" onclick="document.getElementById('file-imp').click()">Import</button>
+                <button class="btn btn-primary" onclick="ui.openModal()">+ New Question</button>
+            </div>
+            <input type="file" id="file-imp" accept=".json" hidden onchange="io.import(event)">
+        </div>
+
+        <div id="grid" class="grid"></div>
+
+        <div id="empty" class="empty-state">
+            <h2>No Questions Loaded</h2>
+            <p>Import <code>question_bank.json</code> to start editing.</p>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <h2 style="margin-bottom: 24px;">Edit Question</h2>
+            <form onsubmit="app.save(event)">
+                <input type="hidden" id="id">
+
+                <div class="form-section">
+                    <label class="form-label">Creator Name</label>
+                    <input type="text" id="creator" class="glass-input" required>
+                </div>
+
+                <div class="form-section">
+                    <label class="form-label">Question Prompt</label>
+                    <div class="dual-input">
+                        <div>
+                            <span class="lang-tag">ENGLISH</span>
+                            <input type="text" id="q-en" class="glass-input" required placeholder="e.g. The Sun">
+                        </div>
+                        <div>
+                            <span class="lang-tag">MANDARIN (中文)</span>
+                            <input type="text" id="q-zh" class="glass-input" required placeholder="e.g. 太阳">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <label class="form-label">Spectrum Ends (Left ↔ Right)</label>
+
+                    <div class="dual-input" style="margin-bottom: 10px;">
+                        <div>
+                            <span class="lang-tag">LEFT (EN)</span>
+                            <input type="text" id="left-en" class="glass-input" required placeholder="Cold">
+                        </div>
+                        <div>
+                            <span class="lang-tag">RIGHT (EN)</span>
+                            <input type="text" id="right-en" class="glass-input" required placeholder="Hot">
+                        </div>
+                    </div>
+
+                    <div class="dual-input">
+                        <div>
+                            <span class="lang-tag">LEFT (ZH)</span>
+                            <input type="text" id="left-zh" class="glass-input" required placeholder="冷">
+                        </div>
+                        <div>
+                            <span class="lang-tag">RIGHT (ZH)</span>
+                            <input type="text" id="right-zh" class="glass-input" required placeholder="热">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-dial-container">
+                    <div class="range-header" style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                        <span class="form-label" style="margin:0;">TARGET POSITION</span>
+                    </div>
+
+                    <div class="dial-value-display" id="target-display">50</div>
+
+                    <div class="dial-board">
+                        <div class="dial-target-wedge" id="dial-wedge">
+                            <div class="zone-layer zone-2" title="2 Points"></div>
+                            <div class="zone-layer zone-3" title="3 Points"></div>
+                            <div class="zone-layer zone-4" title="4 Points (Bullseye)"></div>
+                        </div>
+                    </div>
+
+                    <input type="range" id="target" min="0" max="100" value="50" oninput="ui.updateDial(this.value)">
+                    <div
+                        style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); margin-top:8px;">
+                        <span>0 (Left)</span>
+                        <span>100 (Right)</span>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" class="btn btn-secondary" onclick="ui.closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const store = {
+            data: { version: "2.0.0", total_questions: 0, creators: {} },
+            init() {
+                const saved = localStorage.getItem('wavelength_db_v2');
+                if (saved) {
+                    try { this.data = JSON.parse(saved); }
+                    catch (e) { console.error("Storage invalid"); }
+                }
+            },
+            persist() {
+                this.data.total_questions = this.getAll().length;
+                localStorage.setItem('wavelength_db_v2', JSON.stringify(this.data));
+            },
+            getAll() {
+                return Object.entries(this.data.creators).flatMap(([cName, cData]) => {
+                    return cData.questions.map(q => ({ ...q, _creator: cName }));
+                });
+            },
+            get(id) { return this.getAll().find(q => q.id === id); },
+            upsert(creatorName, questionData) {
+                if (!this.data.creators[creatorName]) {
+                    this.data.creators[creatorName] = {
+                        name: creatorName,
+                        description: { en: "Question Designer", zh: "题目设计师" },
+                        questions: []
+                    };
+                }
+                this.delete(questionData.id, false);
+                this.data.creators[creatorName].questions.push(questionData);
+                this.persist();
+            },
+            delete(id, save = true) {
+                Object.keys(this.data.creators).forEach(k => {
+                    this.data.creators[k].questions = this.data.creators[k].questions.filter(q => q.id !== id);
+                });
+                if (save) this.persist();
+            }
+        };
+
+        const ui = {
+            render(list = store.getAll()) {
+                const grid = document.getElementById('grid');
+                const empty = document.getElementById('empty');
+                const counter = document.getElementById('total-count');
+                const select = document.getElementById('filter-creator');
+
+                grid.innerHTML = '';
+                counter.innerText = list.length;
+                empty.style.display = list.length ? 'none' : 'block';
+
+                const currentVal = select.value;
+                const creatorNames = Object.keys(store.data.creators);
+                select.innerHTML = `<option value="">All Creators</option>` +
+                    creatorNames.map(c => `<option value="${c}">${c}</option>`).join('');
+                select.value = currentVal;
+
+                list.forEach(q => {
+                    const splitTopic = (str) => (!str) ? ["?", "?"] : (str.includes('↔') ? str.split('↔') : [str, ""]);
+                    const [l_en, r_en] = splitTopic(q.topic_pair.en);
+                    const [l_zh, r_zh] = splitTopic(q.topic_pair.zh);
+
+                    const el = document.createElement('div');
+                    el.className = 'card';
+                    el.innerHTML = `
+                        <div class="card-actions">
+                            <button class="btn-icon btn-edit" onclick="app.edit('${q.id}')">✎</button>
+                            <button class="btn-icon btn-del" onclick="app.del('${q.id}')">✕</button>
+                        </div>
+                        <div class="card-meta"><span class="badge">${q._creator}</span></div>
+                        <div class="card-title">${q.question_text.en}</div>
+                        <div class="card-subtitle">${q.question_text.zh}</div>
+                        <div class="spectrum-wrap">
+                            <div class="spectrum-labels"><span>${l_en}</span><span>${r_en}</span></div>
+                            <div class="spectrum-labels spectrum-zh"><span>${l_zh}</span><span>${r_zh}</span></div>
+                            <div class="spectrum-bar"><div class="spectrum-marker" style="left: ${q.target_position}%"></div></div>
+                        </div>
+                    `;
+                    grid.appendChild(el);
+                });
+            },
+
+            updateDial(val) {
+                document.getElementById('target-display').innerText = val;
+                document.getElementById('dial-wedge').style.left = val + '%';
+            },
+
+            openModal(q = null) {
+                const overlay = document.getElementById('modal');
+                const form = document.querySelector('form');
+                form.reset();
+
+                if (q) {
+                    document.getElementById('id').value = q.id;
+                    document.getElementById('creator').value = q._creator;
+                    document.getElementById('q-en').value = q.question_text.en;
+                    document.getElementById('q-zh').value = q.question_text.zh;
+
+                    const split = (s) => s && s.includes('↔') ? s.split('↔').map(t => t.trim()) : [s, ""];
+                    const [le, re] = split(q.topic_pair.en);
+                    const [lz, rz] = split(q.topic_pair.zh);
+
+                    document.getElementById('left-en').value = le;
+                    document.getElementById('right-en').value = re;
+                    document.getElementById('left-zh').value = lz;
+                    document.getElementById('right-zh').value = rz;
+
+                    document.getElementById('target').value = q.target_position;
+                    this.updateDial(q.target_position);
+                } else {
+                    document.getElementById('id').value = '';
+                    document.getElementById('target').value = 50;
+                    this.updateDial(50);
+                }
+                overlay.classList.add('active');
+            },
+
+            closeModal() { document.getElementById('modal').classList.remove('active'); }
+        };
+
+        const app = {
+            init() {
+                store.init();
+                ui.render();
+                document.addEventListener('keydown', (e) => { if (e.key === "Escape") ui.closeModal(); });
+            },
+            filter() {
+                const term = document.getElementById('search').value.toLowerCase();
+                const cat = document.getElementById('filter-creator').value;
+                const filtered = store.getAll().filter(q => {
+                    const textMatch = q.question_text.en.toLowerCase().includes(term) || q.question_text.zh.includes(term);
+                    const catMatch = cat ? q._creator === cat : true;
+                    return textMatch && catMatch;
+                });
+                ui.render(filtered);
+            },
+            save(e) {
+                e.preventDefault();
+                const formData = {
+                    id: document.getElementById('id').value || `q_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                    creator: document.getElementById('creator').value.trim(),
+                    q_en: document.getElementById('q-en').value.trim(),
+                    q_zh: document.getElementById('q-zh').value.trim(),
+                    l_en: document.getElementById('left-en').value.trim(),
+                    r_en: document.getElementById('right-en').value.trim(),
+                    l_zh: document.getElementById('left-zh').value.trim(),
+                    r_zh: document.getElementById('right-zh').value.trim(),
+                    target: parseInt(document.getElementById('target').value)
+                };
+
+                const newQuestion = {
+                    id: formData.id,
+                    target_position: formData.target,
+                    question_text: { en: formData.q_en, zh: formData.q_zh },
+                    topic_pair: {
+                        en: `${formData.l_en} ↔ ${formData.r_en}`,
+                        zh: `${formData.l_zh} ↔ ${formData.r_zh}`
+                    },
+                    question_creator: formData.creator
+                };
+
+                store.upsert(formData.creator, newQuestion);
+                ui.closeModal();
+                ui.render();
+                app.filter();
+            },
+            edit(id) { const q = store.get(id); if (q) ui.openModal(q); },
+            del(id) { if (confirm("Delete this question?")) { store.delete(id); ui.render(); app.filter(); } }
+        };
+
+        const io = {
+            export() {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store.data, null, 2));
+                const node = document.createElement('a');
+                node.setAttribute("href", dataStr);
+                node.setAttribute("download", "question_bank.json");
+                document.body.appendChild(node);
+                node.click();
+                node.remove();
+            },
+            import(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const json = JSON.parse(ev.target.result);
+                        if (!json.creators) throw new Error("Invalid JSON structure");
+                        if (confirm(`Load ${json.total_questions || "file"} questions?`)) {
+                            store.data = json;
+                            store.persist();
+                            ui.render();
+                        }
+                    } catch (err) { alert("Error: " + err.message); }
+                    e.target.value = "";
+                };
+                reader.readAsText(file);
+            }
+        };
+
+        app.init();
+    </script>
+</body>
+
+</html>

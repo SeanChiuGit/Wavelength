@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Wavelength 远程版</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=ZCOOL+XiaoWei&display=swap"
+    rel="stylesheet">
+
+  <link rel="stylesheet" href="../src/css/style.css">
+
+  <style>
+    .nav-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      gap: 10px;
+      z-index: 1000;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: calc(100% - 40px);
+    }
+
+    .nav-button {
+      color: #4a64f7;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 20px;
+      background: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      display: inline-block;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .nav-button:hover {
+      color: #667eea;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(74, 100, 247, 0.2);
+    }
+
+    .nav-button.lang-btn {
+      border: 2px solid #4a64f7;
+    }
+
+    /* 汉堡菜单按钮 */
+    .menu-toggle {
+      display: none;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1001;
+      background: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      width: 44px;
+      height: 44px;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 24px;
+      height: 3px;
+      background: #4a64f7;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .menu-toggle.active span:nth-child(1) {
+      transform: translateY(7px) rotate(45deg);
+    }
+
+    .menu-toggle.active span:nth-child(2) {
+      opacity: 0;
+    }
+
+    .menu-toggle.active span:nth-child(3) {
+      transform: translateY(-7px) rotate(-45deg);
+    }
+
+    /* 平板尺寸 */
+    @media (max-width: 768px) {
+      .nav-container {
+        top: 10px;
+        right: 10px;
+        gap: 8px;
+        max-width: calc(100% - 20px);
+      }
+
+      .nav-button {
+        padding: 8px 15px;
+        font-size: 13px;
+      }
+
+      .menu-toggle {
+        top: 10px;
+        right: 10px;
+      }
+    }
+
+    /* 手机尺寸 - 汉堡菜单 */
+    @media (max-width: 480px) {
+      .menu-toggle {
+        display: flex;
+      }
+
+      .nav-container {
+        position: fixed;
+        top: 64px;
+        right: 10px;
+        left: auto;
+        flex-direction: column;
+        gap: 8px;
+        width: 200px;
+        max-width: calc(100vw - 20px);
+        background: white;
+        padding: 10px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+      }
+
+      .nav-container.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+
+      .nav-button {
+        padding: 12px 16px;
+        font-size: 14px;
+        width: 100%;
+        text-align: left;
+        display: block;
+        box-sizing: border-box;
+        margin: 0;
+      }
+
+      .nav-button.lang-btn {
+        border: 2px solid #4a64f7;
+        box-sizing: border-box;
+      }
+    }
+  </style>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+  <!-- ✅ 礼炮特效库 -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+
+
+<body>
+  <!-- 汉堡菜单按钮 -->
+  <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- 导航按钮 -->
+  <div class="nav-container" id="nav-container">
+    <a href="singleplayer.html" data-i18n="singlePlayerMode" class="nav-button">🎮 单人模式</a>
+    <a href="question-editor.html" class="nav-button">📝 题库编辑</a>
+    <button id="lang-switch" class="nav-button lang-btn">EN</button>
+  </div>
+
+  <div class="container">
+    <div id="title">
+      <svg width="500" height="200" viewBox="0 -10 500 200">
+        <path id="arcPath" d="M50,140 A400,400 0 0,1 450,140" fill="none" />
+        <text>
+          <textPath href="#arcPath" startOffset="50%" text-anchor="middle">
+            <tspan>W</tspan>
+            <tspan>A</tspan>
+            <tspan>V</tspan>
+            <tspan>E</tspan>
+            <tspan>L</tspan>
+            <tspan>E</tspan>
+            <tspan>N</tspan>
+            <tspan>G</tspan>
+            <tspan>T</tspan>
+            <tspan>H</tspan>
+          </textPath>
+        </text>
+      </svg>
+    </div>
+
+    <div id="control-panel">
+      <button id="create" class="button-9" role="button" onclick="createRoom()" data-i18n="createRoom">🛋️ 创建房间</button>
+      <div id="connection-area">
+        <div id="input-row">
+          <input id="roomId" type="text" data-i18n-placeholder="enterRoomId" placeholder="输入房间号">
+          <button id="join" class="button-9" role="button" onclick="joinRoom()" data-i18n="joinRoom">🔗 加入</button>
+        </div>
+        <div id="status-row">
+          <span id="connection-status" data-i18n="notConnected">❌ 未连接</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⏰ 时间设置面板 -->
+    <div id="time-settings"
+      style="display: none; margin: 20px auto; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; max-width: 400px;">
+      <h3 style="margin: 0 0 10px 0; font-size: 16px;">⚙️ 时间设置</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <label for="hintTime" style="flex: 1;">出题时间：</label>
+          <input type="range" id="hintTime" min="10" max="80" value="30" step="5" style="flex: 2; margin: 0 10px;"
+            oninput="updateTimeDisplay('hint')">
+          <span id="hintTimeDisplay" style="min-width: 50px; text-align: right;">30秒</span>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <label for="guessTime" style="flex: 1;">猜测时间：</label>
+          <input type="range" id="guessTime" min="10" max="80" value="15" step="5" style="flex: 2; margin: 0 10px;"
+            oninput="updateTimeDisplay('guess')">
+          <span id="guessTimeDisplay" style="min-width: 50px; text-align: right;">15秒</span>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="dimension">
+      <span id="left-label" data-i18n="loading">加载中...</span>
+      <canvas id="arcCanvas" width="400" height="250"></canvas>
+      <span id="right-label" data-i18n="loading">加载中...</span>
+    </div>
+
+
+
+    <p id="game-step">等待开始游戏...</p>
+
+    <!-- ✅ 房主开始游戏按钮 -->
+    <button id="startGameBtn" class="button-9" role="button" onclick="hostStartGame()" style="display:none;">🚀
+      开始游戏</button>
+
+    <!-- ✅ 输入提示词区域（当前出题方） -->
+    <div id="hint-input" style="display:none;">
+      <input type="text" id="hintBox" placeholder="输入提示词">
+      <button class="button-9" role="button" onclick="confirmHint()">确认提示</button>
+    </div>
+
+    <!-- ✅ 猜测区域（当前猜测方） -->
+    <div id="guess-section" style="display:none;">
+      <p>提示词：<span id="hint">（等待提示）</span></p>
+      <input type="range" id="guessSlider" min="0" max="100" value="50">
+      <button class="button-9" role="button" onclick="submitGuess()">👍🏿 提交</button>
+    </div>
+
+    <!-- 倒计时 -->
+    <div id="countdown" style="display:none; font-weight: bold; margin-top: 10px; font-size: 18px;"></div>
+
+    <p id="result"></p>
+
+    <!-- ✅ 下一轮按钮：开始新一轮并切换角色 -->
+    <button id="nextRoundBtn" class="button-9" role="button" onclick="nextRound()" style="display:none;">🔁 下一轮</button>
+  </div>
+
+  <!-- ✅ 🎊 庆祝音效 -->
+  <audio id="celebrateSound" src="assets/audio/partypop.mp3" preload="auto"></audio>
+
+  <!-- 汉堡菜单脚本 -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.getElementById('menu-toggle');
+      const navContainer = document.getElementById('nav-container');
+
+      menuToggle.addEventListener('click', function() {
+        menuToggle.classList.toggle('active');
+        navContainer.classList.toggle('active');
+      });
+
+      // 点击菜单项后关闭菜单
+      const navButtons = navContainer.querySelectorAll('.nav-button');
+      navButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          menuToggle.classList.remove('active');
+          navContainer.classList.remove('active');
+        });
+      });
+
+      // 点击菜单外部关闭菜单
+      document.addEventListener('click', function(event) {
+        if (!menuToggle.contains(event.target) && !navContainer.contains(event.target)) {
+          menuToggle.classList.remove('active');
+          navContainer.classList.remove('active');
+        }
+      });
+    });
+  </script>
+
+  <!-- 语言配置 -->
+  <script src="../src/js/lang.js"></script>
+  <!-- ✅ 游戏逻辑脚本 -->
+  <script src="../src/js/multiplayer.js"></script>
+</body>
+<div style="text-align: center;">
+  <div id="rules">
+    <h3 id="rules-title" data-i18n="multiplayerRulesTitle">游戏规则</h3>
+    <p data-i18n="multiplayerRule1">1. 房主点击"创建房间"，分享房间号。</p>
+    <p data-i18n="multiplayerRule2">2. 出题方输入提示词，猜测方拖动滑条猜位置。</p>
+    <p data-i18n="multiplayerRule3">3. 尝试理解彼此的思路，挑战默契极限！🔥</p>
+  </div>
+</div>
+
+</html>
+
+<audio id="moveSound0" src="assets/audio/tick.mp3" preload="auto"></audio>
+<audio id="moveSound1" src="assets/audio/tick.mp3" preload="auto"></audio>
+<audio id="moveSound2" src="assets/audio/tick.mp3" preload="auto"></audio>
+<audio id="moveSound3" src="assets/audio/tick.mp3" preload="auto"></audio>
+<audio id="moveSound4" src="assets/audio/tick.mp3" preload="auto"></audio>

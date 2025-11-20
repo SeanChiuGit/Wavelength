@@ -14,7 +14,7 @@ const translations = {
 		creatorDesc: {
 			Sean: "充满创意的题目设计师",
 			Charles: "思考型题目专家",
-			Brus: "哲学与深度思考者"
+			Brus: "哲学与深度思考者",
 		},
 
 		// 游戏界面
@@ -74,7 +74,8 @@ const translations = {
 		timeSettings: "⚙️ 时间设置",
 		hintTime: "出题时间：",
 		guessTime: "猜测时间：",
-		seconds: "秒"
+		seconds: "秒",
+		loading: "加载中...",
 	},
 
 	en: {
@@ -91,7 +92,7 @@ const translations = {
 		creatorDesc: {
 			Sean: "Creative Question Designer",
 			Charles: "Thoughtful Question Expert",
-			Brus: "Philosophy & Deep Thinker"
+			Brus: "Philosophy & Deep Thinker",
 		},
 
 		// Game interface
@@ -134,15 +135,18 @@ const translations = {
 		// Rules
 		rulesTitle: "Game Rules",
 		rule1: "1. Select a creator and guess what they think",
-		rule2: "2. After viewing the question, guess the answer position on the spectrum",
+		rule2:
+			"2. After viewing the question, guess the answer position on the spectrum",
 		rule3: "3. Or select 'I'll Create' to share your thoughts! 🎨",
 
 		// Multiplayer mode
 		singlePlayerMode: "🎮 Single Player",
 		multiplayerRulesTitle: "Game Rules",
 		multiplayerRule1: "1. Host creates a room and shares the room code.",
-		multiplayerRule2: "2. Questioner enters hint, guesser drags slider to guess position.",
-		multiplayerRule3: "3. Try to understand each other's thoughts, challenge your connection! 🔥",
+		multiplayerRule2:
+			"2. Questioner enters hint, guesser drags slider to guess position.",
+		multiplayerRule3:
+			"3. Try to understand each other's thoughts, challenge your connection! 🔥",
 		createRoom: "🛋️ Create Room",
 		joinRoom: "🔗 Join",
 		enterRoomId: "Enter room code",
@@ -151,16 +155,17 @@ const translations = {
 		timeSettings: "⚙️ Time Settings",
 		hintTime: "Hint time:",
 		guessTime: "Guess time:",
-		seconds: "sec"
-	}
+		seconds: "sec",
+		loading: "Loading...",
+	},
 };
 
 // 当前语言
-let currentLang = 'zh';
+let currentLang = "zh";
 
 // 获取翻译文本
 function t(key, replacements = {}) {
-	const keys = key.split('.');
+	const keys = key.split(".");
 	let value = translations[currentLang];
 
 	for (const k of keys) {
@@ -180,41 +185,41 @@ function t(key, replacements = {}) {
 // 切换语言
 function switchLanguage(lang) {
 	currentLang = lang;
-	localStorage.setItem('wavelength_lang', lang);
+	localStorage.setItem("wavelength_lang", lang);
 	updateAllText();
 }
 
 // 更新所有文本
 function updateAllText() {
 	// 更新所有带 data-i18n 属性的元素
-	document.querySelectorAll('[data-i18n]').forEach(el => {
-		const key = el.getAttribute('data-i18n');
+	document.querySelectorAll("[data-i18n]").forEach((el) => {
+		const key = el.getAttribute("data-i18n");
 		el.textContent = t(key);
 	});
 
 	// 更新所有带 data-i18n-placeholder 属性的元素
-	document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-		const key = el.getAttribute('data-i18n-placeholder');
+	document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+		const key = el.getAttribute("data-i18n-placeholder");
 		el.placeholder = t(key);
 	});
 
 	// 更新语言切换按钮
-	const langButton = document.getElementById('lang-switch');
+	const langButton = document.getElementById("lang-switch");
 	if (langButton) {
-		langButton.textContent = currentLang === 'zh' ? 'EN' : '中文';
+		langButton.textContent = currentLang === "zh" ? "🇬🇧 EN" : "🇨🇳 中文";
 	}
 }
 
 // 页面加载时初始化语言
-window.addEventListener('DOMContentLoaded', () => {
-	const savedLang = localStorage.getItem('wavelength_lang') || 'zh';
+window.addEventListener("DOMContentLoaded", () => {
+	const savedLang = localStorage.getItem("wavelength_lang") || "zh";
 	switchLanguage(savedLang);
 
 	// 添加语言切换按钮事件
-	const langButton = document.getElementById('lang-switch');
+	const langButton = document.getElementById("lang-switch");
 	if (langButton) {
-		langButton.addEventListener('click', () => {
-			switchLanguage(currentLang === 'zh' ? 'en' : 'zh');
+		langButton.addEventListener("click", () => {
+			switchLanguage(currentLang === "zh" ? "en" : "zh");
 		});
 	}
 });
