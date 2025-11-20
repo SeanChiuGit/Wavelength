@@ -4,6 +4,7 @@ const translations = {
 		// 主标题
 		mainTitle: "一个人也能玩",
 		modeSwitch: "切换到多人模式",
+		questionEditor: "📝 题库编辑",
 
 		// 出题者选择
 		selectCreator: "选择出题者：",
@@ -82,6 +83,7 @@ const translations = {
 		// Main title
 		mainTitle: "Play Solo",
 		modeSwitch: "Switch to Multiplayer",
+		questionEditor: "📝 Question Editor",
 
 		// Creator selection
 		selectCreator: "Select Creator:",

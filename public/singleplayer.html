@@ -103,6 +103,7 @@
     }
 
     @keyframes pulse-gold {
+
       0%,
       100% {
         box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
@@ -393,7 +394,7 @@
   <!-- 导航按钮 -->
   <div class="nav-container" id="nav-container">
     <a href="index.html" data-i18n="modeSwitch" class="nav-button">🔄 多人模式</a>
-    <a href="question-editor.html" class="nav-button">📝 题库编辑</a>
+    <a href="question-editor.html" data-i18n="questionEditor" class="nav-button">📝 题库编辑</a>
     <button id="lang-switch" class="nav-button lang-btn">EN</button>
   </div>
 
@@ -463,14 +464,16 @@
         <p id="guess-instruction" style="font-size: 16px; margin: 20px 0;" data-i18n="dragSlider">拖动滑条或点击弧线进行猜测</p>
         <input type="range" id="guessSlider" min="0" max="100" value="50">
         <br>
-        <button class="button-9" role="button" onclick="submitGuess()" style="margin-top: 15px;" data-i18n="submitAnswer">提交答案</button>
+        <button class="button-9" role="button" onclick="submitGuess()" style="margin-top: 15px;"
+          data-i18n="submitAnswer">提交答案</button>
       </div>
 
       <!-- 结果区域 -->
       <div id="result-section">
         <div id="result-text"></div>
         <button class="button-9" role="button" onclick="loadNextQuestion()"
-          style="margin-top: 20px; background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);" data-i18n="nextQuestion">下一题</button>
+          style="margin-top: 20px; background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);"
+          data-i18n="nextQuestion">下一题</button>
       </div>
 
       <!-- 反馈调查 -->
@@ -500,11 +503,11 @@
 
   <!-- 汉堡菜单脚本 -->
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const menuToggle = document.getElementById('menu-toggle');
       const navContainer = document.getElementById('nav-container');
 
-      menuToggle.addEventListener('click', function() {
+      menuToggle.addEventListener('click', function () {
         menuToggle.classList.toggle('active');
         navContainer.classList.toggle('active');
       });
@@ -512,14 +515,14 @@
       // 点击菜单项后关闭菜单
       const navButtons = navContainer.querySelectorAll('.nav-button');
       navButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
           menuToggle.classList.remove('active');
           navContainer.classList.remove('active');
         });
       });
 
       // 点击菜单外部关闭菜单
-      document.addEventListener('click', function(event) {
+      document.addEventListener('click', function (event) {
         if (!menuToggle.contains(event.target) && !navContainer.contains(event.target)) {
           menuToggle.classList.remove('active');
           navContainer.classList.remove('active');

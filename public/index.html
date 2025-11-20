@@ -185,7 +185,7 @@
   <!-- 导航按钮 -->
   <div class="nav-container" id="nav-container">
     <a href="singleplayer.html" data-i18n="singlePlayerMode" class="nav-button">🎮 单人模式</a>
-    <a href="question-editor.html" class="nav-button">📝 题库编辑</a>
+    <a href="question-editor.html" data-i18n="questionEditor" class="nav-button">📝 题库编辑</a>
     <button id="lang-switch" class="nav-button lang-btn">EN</button>
   </div>
 
@@ -286,11 +286,11 @@
 
   <!-- 汉堡菜单脚本 -->
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const menuToggle = document.getElementById('menu-toggle');
       const navContainer = document.getElementById('nav-container');
 
-      menuToggle.addEventListener('click', function() {
+      menuToggle.addEventListener('click', function () {
         menuToggle.classList.toggle('active');
         navContainer.classList.toggle('active');
       });
@@ -298,14 +298,14 @@
       // 点击菜单项后关闭菜单
       const navButtons = navContainer.querySelectorAll('.nav-button');
       navButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function () {
           menuToggle.classList.remove('active');
           navContainer.classList.remove('active');
         });
       });
 
       // 点击菜单外部关闭菜单
-      document.addEventListener('click', function(event) {
+      document.addEventListener('click', function (event) {
         if (!menuToggle.contains(event.target) && !navContainer.contains(event.target)) {
           menuToggle.classList.remove('active');
           navContainer.classList.remove('active');

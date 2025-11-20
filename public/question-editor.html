@@ -374,77 +374,92 @@
             text-align: center;
         }
 
-        /* The "Board" Background */
+        /* Dial Visualization */
         .dial-board {
-            height: 40px;
-            background: var(--spectrum-gradient);
-            border-radius: 20px;
             position: relative;
             margin: 10px 0 30px 0;
-            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.1);
+            padding: 0 8px 12px;
         }
 
-        /* The Moving Target "Wedge" */
-        .dial-target-wedge {
-            position: absolute;
-            top: -5px;
-            bottom: -5px;
-            width: 40px;
-            /* Width of the entire scoring zone */
-            transform: translateX(-50%);
-            /* Center on the value */
-            z-index: 10;
-            pointer-events: none;
-            /* Let clicks pass through to slider if needed */
-
-            /* Visual styling of the scoring container */
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-
-            /* Shadow to make it pop off the board */
-            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
-        }
-
-        /* Scoring Zones inside the Wedge */
-        .zone-layer {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            border-radius: 4px;
-        }
-
-        .zone-2 {
+        .dial-arc {
             width: 100%;
-            background-color: var(--zone-2);
-            z-index: 1;
-            border-radius: 20px;
-            /* Rounded outer edges */
+            height: 240px;
+            display: block;
         }
 
-        .zone-3 {
-            width: 60%;
-            background-color: var(--zone-3);
-            z-index: 2;
-            left: 20%;
-        }
-
-        .zone-4 {
-            width: 25%;
-            background-color: var(--zone-4);
-            z-index: 3;
-            left: 37.5%;
-            /* White tick mark in center */
+        .dial-score-legend {
             display: flex;
-            align-items: center;
             justify-content: center;
+            gap: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-top: 8px;
+            flex-wrap: wrap;
         }
 
-        .zone-4::after {
+        .dial-score-legend .legend-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.04);
+            position: relative;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .legend-tooltip {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 50%;
+            transform: translate(-50%, 2px);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-main);
+            background: white;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .legend-tooltip::before {
             content: '';
-            width: 2px;
-            height: 60%;
-            background: rgba(255, 255, 255, 0.8);
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 10px;
+            height: 10px;
+            background: white;
+            border-left: 1px solid rgba(148, 163, 184, 0.35);
+            border-top: 1px solid rgba(148, 163, 184, 0.35);
+            transform-origin: center;
+            box-shadow: -2px -2px 6px rgba(15, 23, 42, 0.08);
+        }
+
+        .legend-pill:hover .legend-tooltip {
+            opacity: 1;
+            transform: translate(-50%, -2px);
+        }
+
+        .legend-dot.zone-3 {
+            background-color: rgba(34, 197, 94, 0.35);
+        }
+
+        .legend-dot.zone-4 {
+            background-color: #22c55e;
         }
 
         .dial-value-display {
@@ -486,7 +501,6 @@
             color: var(--text-muted);
             display: none;
         }
-
     </style>
 </head>
 
@@ -589,14 +603,24 @@
                     <div class="dial-value-display" id="target-display">50</div>
 
                     <div class="dial-board">
-                        <div class="dial-target-wedge" id="dial-wedge">
-                            <div class="zone-layer zone-2" title="2 Points"></div>
-                            <div class="zone-layer zone-3" title="3 Points"></div>
-                            <div class="zone-layer zone-4" title="4 Points (Bullseye)"></div>
+                        <canvas id="dial-arc" class="dial-arc" width="520" height="240"
+                            aria-label="Wavelength scoring arc preview"></canvas>
+                        <div class="dial-score-legend">
+                            <span class="legend-pill">
+                                <span class="legend-dot zone-3"></span>
+                                <span>3 pts</span>
+                                <span class="legend-tooltip">diff 6-15</span>
+                            </span>
+                            <span class="legend-pill">
+                                <span class="legend-dot zone-4"></span>
+                                <span>4 pts</span>
+                                <span class="legend-tooltip">diff 0-5</span>
+                            </span>
                         </div>
                     </div>
 
-                    <input type="range" id="target" min="0" max="100" value="50" oninput="ui.updateDial(this.value)">
+                    <!-- Slider with min=5 max=95 -->
+                    <input type="range" id="target" min="5" max="95" value="50" oninput="ui.updateDial(this.value)">
                     <div
                         style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); margin-top:8px;">
                         <span>0 (Left)</span>
@@ -652,6 +676,114 @@
             }
         };
 
+        const dialArc = (() => {
+            let canvas = null;
+            let ctx = null;
+            let currentValue = 50;
+            const fourPointWindow = 5;
+            const threePointWindow = 15;
+            let colors = {
+                board: 'rgba(148, 163, 184, 0.8)',
+                four: '#22c55e',
+                three: 'rgba(34, 197, 94, 0.35)',
+                stroke: '#94a3b8'
+            };
+
+            const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
+
+            const readColors = () => {
+                const styles = getComputedStyle(document.documentElement);
+                const defaults = { ...colors };
+                colors = {
+                    board: styles.getPropertyValue('--border').trim() || defaults.board,
+                    four: defaults.four,
+                    three: defaults.three,
+                    stroke: styles.getPropertyValue('--text-muted').trim() || defaults.stroke
+                };
+            };
+
+            const ensureContext = () => {
+                if (!canvas) return false;
+                if (!ctx) ctx = canvas.getContext('2d');
+                return !!ctx;
+            };
+
+            const resize = () => {
+                if (!canvas) return;
+                const parentWidth = canvas.parentElement?.clientWidth || 520;
+                const height = Math.max(200, Math.min(300, parentWidth * 0.45));
+                canvas.width = parentWidth;
+                canvas.height = height;
+                draw(currentValue);
+            };
+
+            const draw = (value = currentValue) => {
+                if (!ensureContext()) return;
+                currentValue = Number(value);
+                const { width, height } = canvas;
+                ctx.clearRect(0, 0, width, height);
+
+                const cx = width / 2;
+                const cy = height - 15;
+                const radius = Math.min(width / 2 - 20, height - 30);
+                ctx.lineCap = 'round';
+
+                ctx.lineWidth = 16;
+                ctx.strokeStyle = colors.board || '#cbd5e1';
+                ctx.beginPath();
+                ctx.arc(cx, cy, radius, Math.PI, 0, false);
+                ctx.stroke();
+                const segments = [
+                    { color: colors.three, start: currentValue - threePointWindow, end: currentValue - (fourPointWindow + 1) },
+                    { color: colors.four, start: currentValue - fourPointWindow, end: currentValue + fourPointWindow },
+                    { color: colors.three, start: currentValue + (fourPointWindow + 1), end: currentValue + threePointWindow }
+                ].map(seg => ({
+                    color: seg.color,
+                    start: clamp(seg.start, 0, 100),
+                    end: clamp(seg.end, 0, 100)
+                })).filter(seg => seg.end > seg.start);
+
+                ctx.lineWidth = 26;
+                ctx.shadowColor = 'rgba(15, 23, 42, 0.15)';
+                ctx.shadowBlur = 10;
+                segments.forEach(seg => {
+                    const sAngle = Math.PI + Math.PI * (seg.start / 100);
+                    const eAngle = Math.PI + Math.PI * (seg.end / 100);
+                    ctx.beginPath();
+                    ctx.strokeStyle = seg.color;
+                    ctx.arc(cx, cy, radius, sAngle, eAngle, false);
+                    ctx.stroke();
+                });
+                ctx.shadowBlur = 0;
+
+                const midAngle = Math.PI + Math.PI * (currentValue / 100);
+                const inner = radius - 40;
+                const outer = radius + 12;
+                ctx.strokeStyle = colors.stroke || '#475569';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(cx + inner * Math.cos(midAngle), cy + inner * Math.sin(midAngle));
+                ctx.lineTo(cx + outer * Math.cos(midAngle), cy + outer * Math.sin(midAngle));
+                ctx.stroke();
+
+                ctx.fillStyle = colors.stroke || '#0f172a';
+                ctx.beginPath();
+                ctx.arc(cx + outer * Math.cos(midAngle), cy + outer * Math.sin(midAngle), 5, 0, Math.PI * 2);
+                ctx.fill();
+            };
+
+            const init = () => {
+                canvas = document.getElementById('dial-arc');
+                if (!canvas) return;
+                ctx = canvas.getContext('2d');
+                readColors();
+                resize();
+                window.addEventListener('resize', resize);
+            };
+
+            return { init, draw, resize };
+        })();
+
         const ui = {
             render(list = store.getAll()) {
                 const grid = document.getElementById('grid');
@@ -696,7 +828,7 @@
 
             updateDial(val) {
                 document.getElementById('target-display').innerText = val;
-                document.getElementById('dial-wedge').style.left = val + '%';
+                dialArc.draw(val);
             },
 
             openModal(q = null) {
@@ -727,6 +859,7 @@
                     this.updateDial(50);
                 }
                 overlay.classList.add('active');
+                requestAnimationFrame(() => dialArc.resize());
             },
 
             closeModal() { document.getElementById('modal').classList.remove('active'); }
@@ -812,6 +945,7 @@
             }
         };
 
+        dialArc.init();
         app.init();
     </script>
 </body>
