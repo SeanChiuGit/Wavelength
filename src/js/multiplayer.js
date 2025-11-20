@@ -91,7 +91,7 @@ function updateTimeDisplay(type) {
 	if (type === "hint") {
 		const value = document.getElementById("hintTime").value;
 		hintTimeLimit = parseInt(value);
-		document.getElementById("hintTimeDisplay").textContent = value + "秒";
+		document.getElementById("hintTimeDisplay").textContent = value + t('seconds');
 
 		// 同步到 Firebase（只有房主需要同步）
 		if (playerRole === "host" && currentRoomId) {
@@ -102,7 +102,7 @@ function updateTimeDisplay(type) {
 	} else if (type === "guess") {
 		const value = document.getElementById("guessTime").value;
 		guessTimeLimit = parseInt(value);
-		document.getElementById("guessTimeDisplay").textContent = value + "秒";
+		document.getElementById("guessTimeDisplay").textContent = value + t('seconds');
 
 		// 同步到 Firebase（只有房主需要同步）
 		if (playerRole === "host" && currentRoomId) {
