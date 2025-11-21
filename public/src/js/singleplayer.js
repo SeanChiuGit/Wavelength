@@ -40,37 +40,56 @@ function generateSessionId() {
 }
 
 // 加载题库
-async function loadQuestionBank() {
-	try {
-		// 首先尝试从 localStorage 加载（question-editor 编辑的内容）
-		const localData = localStorage.getItem('wavelength_db_v2');
-		if (localData) {
-			try {
-				const parsed = JSON.parse(localData);
-				if (parsed.creators && Object.keys(parsed.creators).length > 0) {
-					questionBank = parsed;
-					console.log("✅ 题库从本地存储加载成功:", questionBank.total_questions, "道题");
-					return;
-				}
-			} catch (e) {
-				console.warn("本地存储数据解析失败，尝试从文件加载");
-			}
-		}
+// Updated loadQuestionBank function for singleplayer.js
 
-		// 如果本地没有数据，从 JSON 文件加载
-		const response = await fetch("../data/question_bank.json");
-		questionBank = await response.json();
-		console.log("✅ 题库从文件加载成功:", questionBank.total_questions, "道题");
+async function loadQuestionBank() {
+	console.log("🔄 Attempting to load questions from Firebase...");
+
+	try {
+		// 1. Try to fetch from Firebase Realtime Database
+		const snapshot = await database.ref("question_bank").once("value");
+		const data = snapshot.val();
+
+		if (data && data.creators) {
+			questionBank = data;
+			console.log(
+				"✅ Loaded from Cloud (Firebase):",
+				questionBank.total_questions,
+				"questions"
+			);
+			return; // Success! Exit function.
+		} else {
+			console.warn(
+				"⚠️ Firebase is empty or unavailable. Falling back to local file."
+			);
+		}
 	} catch (error) {
-		console.error("❌ 题库加载失败:", error);
-		alert("题库加载失败，请刷新页面重试！");
+		console.warn("⚠️ Cloud load failed:", error.message);
+	}
+
+	// 2. Fallback: Load from local JSON file if Cloud fails
+	try {
+		console.log("📂 Loading local JSON file...");
+		const response = await fetch("data/question_bank.json"); // Ensure path is correct relative to HTML
+		questionBank = await response.json();
+		console.log(
+			"✅ Loaded from Local File:",
+			questionBank.total_questions,
+			"questions"
+		);
+	} catch (error) {
+		console.error(
+			"❌ Critical Error: Could not load questions from Cloud OR Local file.",
+			error
+		);
+		alert("Error loading questions. Please check your connection.");
 	}
 }
 
 // 获取多语言文本（支持对象）
 function getLocalizedText(textObj) {
-	if (typeof textObj === 'string') return textObj;
-	return textObj[currentLang] || textObj['zh'] || textObj['en'] || '';
+	if (typeof textObj === "string") return textObj;
+	return textObj[currentLang] || textObj["zh"] || textObj["en"] || "";
 }
 
 // 开始游戏
@@ -95,9 +114,14 @@ async function startGame(creator = "Sean") {
 		// 显示创作者描述
 		const creatorInfo = questionBank.creators[creator];
 		const creatorDesc = getLocalizedText(creatorInfo.description);
-		document.getElementById("current-creator").innerText = `${t('creatorLabel')}${creator}`;
-		document.getElementById("game-subtitle").innerHTML =
-			`<span style="color: #999; font-size: 14px;">${creatorDesc}</span><br>${t('guessWhat')} 🤔`;
+		document.getElementById("current-creator").innerText = `${t(
+			"creatorLabel"
+		)}${creator}`;
+		document.getElementById(
+			"game-subtitle"
+		).innerHTML = `<span style="color: #999; font-size: 14px;">${creatorDesc}</span><br>${t(
+			"guessWhat"
+		)} 🤔`;
 
 		loadNormalQuestion();
 	}
@@ -105,8 +129,12 @@ async function startGame(creator = "Sean") {
 
 // 加载玩家题库
 async function loadPlayerQuestions() {
-	document.getElementById("current-creator").innerText = `${t('creatorLabel')}${t('playerBank')}`;
-	document.getElementById("game-subtitle").innerText = `${t('guessPlayers')} 🎮`;
+	document.getElementById("current-creator").innerText = `${t(
+		"creatorLabel"
+	)}${t("playerBank")}`;
+	document.getElementById("game-subtitle").innerText = `${t(
+		"guessPlayers"
+	)} 🎮`;
 	document.getElementById("creator-controls").style.display = "none";
 
 	try {
@@ -114,7 +142,7 @@ async function loadPlayerQuestions() {
 		const data = snapshot.val();
 
 		if (!data || Object.keys(data).length === 0) {
-			alert(t('noPlayerQuestions'));
+			alert(t("noPlayerQuestions"));
 			backToMenu();
 			return;
 		}
@@ -123,7 +151,8 @@ async function loadPlayerQuestions() {
 		const playerQuestions = Object.values(data);
 
 		// 随机选择一道题
-		currentQuestion = playerQuestions[Math.floor(Math.random() * playerQuestions.length)];
+		currentQuestion =
+			playerQuestions[Math.floor(Math.random() * playerQuestions.length)];
 		startTime = Date.now();
 
 		// 更新UI - 使用多语言文本
@@ -135,11 +164,15 @@ async function loadPlayerQuestions() {
 		// 显示题目和评价统计
 		const questionText = getLocalizedText(currentQuestion.question_text);
 		const voteStats = await displayQuestionVotes(currentQuestion.id);
-		document.getElementById("question-text").innerHTML = questionText + voteStats;
+		document.getElementById("question-text").innerHTML =
+			questionText + voteStats;
 
 		// 显示玩家出题者名字（普通黑色加粗）
-		document.getElementById("current-creator").innerHTML =
-			`${t('creatorLabel')}<strong style="color: #333;">${currentQuestion.question_creator}</strong>`;
+		document.getElementById("current-creator").innerHTML = `${t(
+			"creatorLabel"
+		)}<strong style="color: #333;">${
+			currentQuestion.question_creator
+		}</strong>`;
 
 		document.getElementById("guessSlider").value = 50;
 		document.getElementById("result-section").style.display = "none";
@@ -149,7 +182,7 @@ async function loadPlayerQuestions() {
 		drawArc(false, false);
 	} catch (error) {
 		console.error("加载玩家题库失败:", error);
-		alert(t('loadFailed'));
+		alert(t("loadFailed"));
 		backToMenu();
 	}
 }
@@ -200,9 +233,13 @@ function submitFeedback(rating) {
 	// 显示感谢消息
 	const feedbackDiv = document.getElementById("feedback-survey");
 	if (rating === "up") {
-		feedbackDiv.innerHTML = `<p style="color: #4a64f7; font-size: 16px;">${t('thanksUp')}</p>`;
+		feedbackDiv.innerHTML = `<p style="color: #4a64f7; font-size: 16px;">${t(
+			"thanksUp"
+		)}</p>`;
 	} else {
-		feedbackDiv.innerHTML = `<p style="color: #ff6f00; font-size: 16px;">${t('thanksDown')}</p>`;
+		feedbackDiv.innerHTML = `<p style="color: #ff6f00; font-size: 16px;">${t(
+			"thanksDown"
+		)}</p>`;
 	}
 
 	setTimeout(() => {
@@ -365,9 +402,9 @@ arcCanvas.addEventListener("click", (e) => {
 
 // 启动创作者模式 - 先询问名字
 function startCreatorMode() {
-	const name = prompt(t('enterName'));
+	const name = prompt(t("enterName"));
 	if (!name || name.trim() === "") {
-		alert(t('nameRequired'));
+		alert(t("nameRequired"));
 		return;
 	}
 
@@ -377,9 +414,9 @@ function startCreatorMode() {
 
 	// 收集所有题目并随机选择3道
 	const allQuestions = [];
-	Object.keys(questionBank.creators).forEach(creator => {
-		questionBank.creators[creator].questions.forEach(q => {
-			allQuestions.push({...q, originalCreator: creator});
+	Object.keys(questionBank.creators).forEach((creator) => {
+		questionBank.creators[creator].questions.forEach((q) => {
+			allQuestions.push({ ...q, originalCreator: creator });
 		});
 	});
 
@@ -389,8 +426,10 @@ function startCreatorMode() {
 
 	document.getElementById("creator-selection").style.display = "none";
 	document.getElementById("game-area").style.display = "block";
-	document.getElementById("current-creator").innerText = `${t('creatorLabel')}${creatorName}`;
-	document.getElementById("game-subtitle").innerText = t('markPosition');
+	document.getElementById("current-creator").innerText = `${t(
+		"creatorLabel"
+	)}${creatorName}`;
+	document.getElementById("game-subtitle").innerText = t("markPosition");
 	document.getElementById("creator-controls").style.display = "none";
 
 	loadCreatorQuestion();
@@ -398,7 +437,10 @@ function startCreatorMode() {
 
 // 加载创作者模式题目
 async function loadCreatorQuestion() {
-	if (creatorModeQuestions.length === 0 || createdQuestionsCount >= MAX_CREATOR_QUESTIONS) {
+	if (
+		creatorModeQuestions.length === 0 ||
+		createdQuestionsCount >= MAX_CREATOR_QUESTIONS
+	) {
 		showCreatorThankYou();
 		return;
 	}
@@ -420,8 +462,10 @@ async function loadCreatorQuestion() {
 	document.getElementById("guessSlider").value = 50;
 
 	// 显示进度
-	document.getElementById("guess-instruction").innerText =
-		t('progress', {current: createdQuestionsCount + 1, total: MAX_CREATOR_QUESTIONS});
+	document.getElementById("guess-instruction").innerText = t("progress", {
+		current: createdQuestionsCount + 1,
+		total: MAX_CREATOR_QUESTIONS,
+	});
 
 	document.getElementById("result-section").style.display = "none";
 	document.getElementById("guess-section").style.display = "block";
@@ -454,8 +498,10 @@ function submitCreatorGuess() {
 
 	// 显示确认
 	document.getElementById("result-text").innerHTML = `
-		<h2 style="margin: 20px 0;">${t('recorded', {count: createdQuestionsCount})}</h2>
-		<p style="font-size: 16px; color: #666;">${t('continuing')}</p>
+		<h2 style="margin: 20px 0;">${t("recorded", {
+			count: createdQuestionsCount,
+		})}</h2>
+		<p style="font-size: 16px; color: #666;">${t("continuing")}</p>
 	`;
 
 	document.getElementById("guess-section").style.display = "none";
@@ -471,12 +517,12 @@ function submitCreatorGuess() {
 function showCreatorThankYou() {
 	document.getElementById("result-text").innerHTML = `
 		<h1 style="font-size: 42px; margin: 20px 0;">🎉</h1>
-		<h2 style="margin: 20px 0;">${t('thanksForCreating')}</h2>
+		<h2 style="margin: 20px 0;">${t("thanksForCreating")}</h2>
 		<p style="font-size: 18px; color: #4a64f7; margin: 15px 0;">
-			${t('willAppear', {name: `<strong>${creatorName}</strong>`})}
+			${t("willAppear", { name: `<strong>${creatorName}</strong>` })}
 		</p>
 		<p style="font-size: 16px; color: #666; margin: 10px 0;">
-			${t('completed', {count: MAX_CREATOR_QUESTIONS})}
+			${t("completed", { count: MAX_CREATOR_QUESTIONS })}
 		</p>
 	`;
 
@@ -487,7 +533,7 @@ function showCreatorThankYou() {
 	// 改变"下一题"按钮为"返回主菜单"
 	const nextBtn = document.querySelector("#result-section .button-9");
 	if (nextBtn) {
-		nextBtn.innerText = t('returnHome');
+		nextBtn.innerText = t("returnHome");
 		nextBtn.onclick = () => {
 			isCreatorMode = false;
 			backToMenu();
@@ -496,16 +542,16 @@ function showCreatorThankYou() {
 }
 
 // 包装 submitGuess 以支持创作者模式
-window.submitGuess = function() {
+window.submitGuess = function () {
 	if (isCreatorMode) {
 		submitCreatorGuess();
 	} else {
 		submitNormalGuess();
 	}
-}
+};
 
 // 包装 loadNextQuestion 以支持创作者模式和玩家题库
-window.loadNextQuestion = function() {
+window.loadNextQuestion = function () {
 	if (isCreatorMode) {
 		loadCreatorQuestion();
 	} else if (currentCreator === "Players") {
@@ -513,7 +559,7 @@ window.loadNextQuestion = function() {
 	} else {
 		loadNormalQuestion();
 	}
-}
+};
 
 // 原始的提交猜测函数（重命名）
 function submitNormalGuess() {
@@ -528,7 +574,7 @@ function submitNormalGuess() {
 	let resultEmoji = "";
 
 	if (difference <= 5) {
-		result = t('perfect');
+		result = t("perfect");
 		resultEmoji = "💯";
 
 		// 🎉 视觉礼炮特效
@@ -543,13 +589,13 @@ function submitNormalGuess() {
 		celebrateSound.currentTime = 0;
 		celebrateSound.play();
 	} else if (difference <= 15) {
-		result = t('veryClose');
+		result = t("veryClose");
 		resultEmoji = "✅";
 	} else if (difference <= 25) {
-		result = t('notBad');
+		result = t("notBad");
 		resultEmoji = "😊";
 	} else {
-		result = t('tooFar');
+		result = t("tooFar");
 		resultEmoji = "😢";
 	}
 
@@ -563,7 +609,9 @@ function submitNormalGuess() {
 // 获取并显示题目评价统计
 async function displayQuestionVotes(questionId) {
 	try {
-		const snapshot = await database.ref(`question_votes/${questionId}`).once("value");
+		const snapshot = await database
+			.ref(`question_votes/${questionId}`)
+			.once("value");
 		const votes = snapshot.val();
 
 		if (votes && (votes.upvotes > 0 || votes.downvotes > 0)) {
@@ -574,7 +622,7 @@ async function displayQuestionVotes(questionId) {
 				<span style="color: #4a64f7;">👍 ${votes.upvotes}</span>
 				<span style="margin: 0 5px;">|</span>
 				<span style="color: #ff6f00;">👎 ${votes.downvotes}</span>
-				<span style="margin-left: 10px;">(${upPercent}% ${t('positive')})</span>
+				<span style="margin-left: 10px;">(${upPercent}% ${t("positive")})</span>
 			</div>`;
 		}
 		return "";
@@ -612,8 +660,9 @@ async function loadNormalQuestion() {
 	document.getElementById("guessSlider").value = 50;
 
 	// 显示当前出题者
-	document.getElementById("current-creator").innerText =
-		`${t('creatorLabel')}${currentCreator}`;
+	document.getElementById("current-creator").innerText = `${t(
+		"creatorLabel"
+	)}${currentCreator}`;
 
 	// 隐藏结果区域
 	document.getElementById("result-section").style.display = "none";

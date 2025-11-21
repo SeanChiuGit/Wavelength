@@ -5,7 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wavelength Studio</title>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <style>
+        /* --- ORIGINAL CSS STYLES --- */
         :root {
             --bg-base: #f3f4f6;
             --surface: rgba(255, 255, 255, 0.9);
@@ -16,19 +21,14 @@
             --text-sub: #4b5563;
             --text-muted: #9ca3af;
             --border: rgba(0, 0, 0, 0.08);
-            /* The Game Spectrum Gradient */
             --spectrum-gradient: linear-gradient(90deg, #38bdf8 0%, #e2e8f0 50%, #f472b6 100%);
             --radius-lg: 20px;
             --radius-md: 12px;
-            --ease-spring: cubic-bezier(0.4, 0, 0.2, 1);
 
             /* Scoring Zone Colors */
             --zone-4: #175E68;
-            /* Bullseye (Teal/Dark) */
             --zone-3: #3E9FA0;
-            /* 3 Points */
             --zone-2: #D97D3E;
-            /* 2 Points (Orange) */
         }
 
         * {
@@ -57,6 +57,41 @@
                 radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0px, transparent 50%),
                 radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.1) 0px, transparent 50%);
             filter: blur(60px);
+        }
+
+        /* --- AUTH SCREEN STYLES --- */
+        #login-screen {
+            position: fixed;
+            inset: 0;
+            background: rgba(243, 244, 246, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid white;
+        }
+
+        /* New Style for Top-Left Return Button */
+        .btn-return-absolute {
+            position: absolute;
+            top: 24px;
+            left: 24px;
+            z-index: 10001;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         /* --- Header --- */
@@ -108,6 +143,22 @@
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: #fee2e2;
+            color: #ef4444;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-left: 10px;
+        }
+
+        .status-badge.connected {
+            background: #dcfce7;
+            color: #16a34a;
         }
 
         /* --- Toolbar --- */
@@ -374,7 +425,6 @@
             text-align: center;
         }
 
-        /* Dial Visualization */
         .dial-board {
             position: relative;
             margin: 10px 0 30px 0;
@@ -387,6 +437,7 @@
             display: block;
         }
 
+        /* Legend & Tooltips */
         .dial-score-legend {
             display: flex;
             justify-content: center;
@@ -415,6 +466,14 @@
             display: inline-block;
         }
 
+        .legend-dot.zone-3 {
+            background-color: rgba(34, 197, 94, 0.35);
+        }
+
+        .legend-dot.zone-4 {
+            background-color: #22c55e;
+        }
+
         .legend-tooltip {
             position: absolute;
             top: calc(100% + 6px);
@@ -432,6 +491,7 @@
             pointer-events: none;
             transition: opacity 0.15s ease, transform 0.15s ease;
             white-space: nowrap;
+            z-index: 10;
         }
 
         .legend-tooltip::before {
@@ -445,21 +505,12 @@
             background: white;
             border-left: 1px solid rgba(148, 163, 184, 0.35);
             border-top: 1px solid rgba(148, 163, 184, 0.35);
-            transform-origin: center;
             box-shadow: -2px -2px 6px rgba(15, 23, 42, 0.08);
         }
 
         .legend-pill:hover .legend-tooltip {
             opacity: 1;
             transform: translate(-50%, -2px);
-        }
-
-        .legend-dot.zone-3 {
-            background-color: rgba(34, 197, 94, 0.35);
-        }
-
-        .legend-dot.zone-4 {
-            background-color: #22c55e;
         }
 
         .dial-value-display {
@@ -501,16 +552,67 @@
             color: var(--text-muted);
             display: none;
         }
+
+        /* Shake Animation for Wrong Password */
+        .shake {
+            animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+        }
+
+        @keyframes shake {
+
+            10%,
+            90% {
+                transform: translate3d(-1px, 0, 0);
+            }
+
+            20%,
+            80% {
+                transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+                transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+                transform: translate3d(4px, 0, 0);
+            }
+        }
     </style>
 </head>
 
 <body>
+    <div id="login-screen">
+        <button class="btn btn-secondary btn-return-absolute" onclick="window.location.href='index.html'">
+            ← Return to Menu
+        </button>
+
+        <div class="login-box">
+            <h2 style="margin-bottom: 10px;">🔒 你发现了一个秘密！</h2>
+            <p style="margin-bottom: 25px; color: var(--text-sub);">前面的区域以后再来探索吧！</p>
+
+            <input type="password" id="auth-pass" class="glass-input"
+                style="text-align: center; font-size: 1.1rem; letter-spacing: 2px; margin-bottom: 20px;"
+                placeholder="Password">
+
+            <button class="btn btn-primary" onclick="checkAuth()" style="width: 100%; justify-content: center;">
+                Unlock Editor
+            </button>
+        </div>
+    </div>
+
     <div class="mesh-bg"></div>
 
     <header>
         <div class="container header-inner">
             <a href="index.html" class="btn-back">← Back to Home</a>
-            <div class="brand"><span>Wavelength Editor</span></div>
+            <div class="brand">
+                <span>Wavelength Editor</span>
+                <span id="connection-status" class="status-badge">Offline</span>
+            </div>
             <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-sub);">
                 <span id="total-count">0</span> items
             </div>
@@ -529,18 +631,16 @@
                 </select>
             </div>
             <div style="display: flex; gap: 10px; margin-left: auto;">
-                <button class="btn btn-secondary" onclick="io.export()">Export JSON</button>
-                <button class="btn btn-secondary" onclick="document.getElementById('file-imp').click()">Import</button>
+                <button class="btn btn-secondary" onclick="io.exportBackup()">Backup JSON</button>
                 <button class="btn btn-primary" onclick="ui.openModal()">+ New Question</button>
             </div>
-            <input type="file" id="file-imp" accept=".json" hidden onchange="io.import(event)">
         </div>
 
         <div id="grid" class="grid"></div>
 
         <div id="empty" class="empty-state">
-            <h2>No Questions Loaded</h2>
-            <p>Import <code>question_bank.json</code> to start editing.</p>
+            <h2>Connecting to Database...</h2>
+            <p>Please wait while we sync with Firebase.</p>
         </div>
     </main>
 
@@ -549,10 +649,13 @@
             <h2 style="margin-bottom: 24px;">Edit Question</h2>
             <form onsubmit="app.save(event)">
                 <input type="hidden" id="id">
+                <input type="hidden" id="original-creator">
+                <input type="hidden" id="original-key">
 
                 <div class="form-section">
                     <label class="form-label">Creator Name</label>
-                    <input type="text" id="creator" class="glass-input" required>
+                    <input type="text" id="creator" class="glass-input" required list="creator-list">
+                    <datalist id="creator-list"></datalist>
                 </div>
 
                 <div class="form-section">
@@ -605,6 +708,7 @@
                     <div class="dial-board">
                         <canvas id="dial-arc" class="dial-arc" width="520" height="240"
                             aria-label="Wavelength scoring arc preview"></canvas>
+
                         <div class="dial-score-legend">
                             <span class="legend-pill">
                                 <span class="legend-dot zone-3"></span>
@@ -619,7 +723,6 @@
                         </div>
                     </div>
 
-                    <!-- Slider with min=5 max=95 -->
                     <input type="range" id="target" min="5" max="95" value="50" oninput="ui.updateDial(this.value)">
                     <div
                         style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); margin-top:8px;">
@@ -637,51 +740,143 @@
     </div>
 
     <script>
+        // --- AUTH LOGIC (SECURE HASH CHECK) ---
+        // "vowel" SHA-256 Hash (Prevents easy "inspect element" viewing)
+        const TARGET_HASH = "59981069c56a2c667397e132d6adebe3a174579592f56f59213bdba8c54d7fa3";
+
+        async function checkAuth() {
+            const input = document.getElementById('auth-pass');
+            const password = input.value;
+
+            // Calculate Hash
+            const msgBuffer = new TextEncoder().encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+            if (hashHex === TARGET_HASH) {
+                // Success
+                const screen = document.getElementById('login-screen');
+                screen.style.transition = 'opacity 0.5s ease';
+                screen.style.opacity = '0';
+                setTimeout(() => screen.style.display = 'none', 500);
+            } else {
+                // Fail
+                input.style.borderColor = '#ef4444';
+                input.classList.add('shake');
+                setTimeout(() => input.classList.remove('shake'), 500);
+                input.value = '';
+            }
+        }
+
+        // Add auth event listeners
+        document.addEventListener("DOMContentLoaded", () => {
+            const passInput = document.getElementById('auth-pass');
+            passInput.focus();
+            passInput.addEventListener("keyup", (e) => {
+                if (e.key === "Enter") checkAuth();
+            });
+        });
+
+        // --- 1. Firebase Config ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2FBVzS2LP-cX_lpMrBX_3xSikz9u-YYI",
+            authDomain: "wavelength-58ccd.firebaseapp.com",
+            databaseURL: "https://wavelength-58ccd-default-rtdb.firebaseio.com",
+            projectId: "wavelength-58ccd",
+            storageBucket: "wavelength-58ccd.firebasestorage.app",
+            messagingSenderId: "942333085121",
+            appId: "1:942333085121:web:2d21b3c00a14f5b5941b40",
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        // --- 2. Store Logic ---
         const store = {
-            data: { version: "2.0.0", total_questions: 0, creators: {} },
+            data: { creators: {} },
+
             init() {
-                const saved = localStorage.getItem('wavelength_db_v2');
-                if (saved) {
-                    try { this.data = JSON.parse(saved); }
-                    catch (e) { console.error("Storage invalid"); }
-                }
+                const statusEl = document.getElementById('connection-status');
+                const emptyEl = document.getElementById('empty');
+
+                db.ref('.info/connected').on('value', (snap) => {
+                    if (snap.val() === true) {
+                        statusEl.innerText = "Connected";
+                        statusEl.classList.add('connected');
+                    } else {
+                        statusEl.innerText = "Offline";
+                        statusEl.classList.remove('connected');
+                    }
+                });
+
+                db.ref('question_bank').on('value', (snapshot) => {
+                    const val = snapshot.val();
+                    if (val) {
+                        this.data = val;
+                        if (!this.data.creators) this.data.creators = {};
+                        ui.render();
+                        app.filter();
+                    } else {
+                        this.data = { creators: {} };
+                        ui.render();
+                        emptyEl.innerHTML = "<h2>No Questions Found</h2><p>Database is empty.</p>";
+                        emptyEl.style.display = 'block';
+                    }
+                }, (error) => {
+                    console.error("Firebase Error:", error);
+                    alert("Error reading database: " + error.message);
+                });
             },
-            persist() {
-                this.data.total_questions = this.getAll().length;
-                localStorage.setItem('wavelength_db_v2', JSON.stringify(this.data));
-            },
-            getAll() {
+
+            getAllFlat() {
+                if (!this.data.creators) return [];
                 return Object.entries(this.data.creators).flatMap(([cName, cData]) => {
-                    return cData.questions.map(q => ({ ...q, _creator: cName }));
+                    if (!cData.questions) return [];
+                    const qCollection = cData.questions;
+                    const qArray = Array.isArray(qCollection)
+                        ? qCollection.map((q, idx) => ({ ...q, _key: idx }))
+                        : Object.entries(qCollection).map(([key, q]) => ({ ...q, _key: key }));
+
+                    return qArray.map(q => ({ ...q, _creator: cName }));
                 });
             },
-            get(id) { return this.getAll().find(q => q.id === id); },
-            upsert(creatorName, questionData) {
-                if (!this.data.creators[creatorName]) {
-                    this.data.creators[creatorName] = {
-                        name: creatorName,
-                        description: { en: "Question Designer", zh: "题目设计师" },
-                        questions: []
-                    };
+
+            get(creator, key) {
+                return this.data.creators[creator].questions[key];
+            },
+
+            async upsert(creatorName, questionData, originalCreator, originalKey) {
+                const rootRef = db.ref(`question_bank/creators/${creatorName}`);
+
+                await rootRef.update({
+                    name: creatorName,
+                    description: { en: "Question Designer", zh: "题目设计师" }
+                });
+
+                if (originalCreator && originalCreator !== creatorName) {
+                    await this.delete(originalCreator, originalKey);
+                    originalKey = null;
                 }
-                this.delete(questionData.id, false);
-                this.data.creators[creatorName].questions.push(questionData);
-                this.persist();
+
+                if (originalKey !== null && originalKey !== "" && originalCreator === creatorName) {
+                    return rootRef.child(`questions/${originalKey}`).set(questionData);
+                } else {
+                    return rootRef.child('questions').push(questionData);
+                }
             },
-            delete(id, save = true) {
-                Object.keys(this.data.creators).forEach(k => {
-                    this.data.creators[k].questions = this.data.creators[k].questions.filter(q => q.id !== id);
-                });
-                if (save) this.persist();
+
+            async delete(creator, key) {
+                return db.ref(`question_bank/creators/${creator}/questions/${key}`).remove();
             }
         };
 
+        // --- 3. Visual Logic (Dial) ---
         const dialArc = (() => {
-            let canvas = null;
-            let ctx = null;
-            let currentValue = 50;
-            const fourPointWindow = 5;
-            const threePointWindow = 15;
+            let canvas = null, ctx = null, currentValue = 50;
+            const fourPointWindow = 5, threePointWindow = 15;
             let colors = {
                 board: 'rgba(148, 163, 184, 0.8)',
                 four: '#22c55e',
@@ -691,34 +886,26 @@
 
             const clamp = (val, min, max) => Math.max(min, Math.min(max, val));
 
-            const readColors = () => {
-                const styles = getComputedStyle(document.documentElement);
-                const defaults = { ...colors };
-                colors = {
-                    board: styles.getPropertyValue('--border').trim() || defaults.board,
-                    four: defaults.four,
-                    three: defaults.three,
-                    stroke: styles.getPropertyValue('--text-muted').trim() || defaults.stroke
-                };
-            };
-
-            const ensureContext = () => {
-                if (!canvas) return false;
-                if (!ctx) ctx = canvas.getContext('2d');
-                return !!ctx;
+            const init = () => {
+                canvas = document.getElementById('dial-arc');
+                if (!canvas) return;
+                ctx = canvas.getContext('2d');
+                const style = getComputedStyle(document.body);
+                colors.board = style.getPropertyValue('--border') || colors.board;
+                resize();
+                window.addEventListener('resize', resize);
             };
 
             const resize = () => {
                 if (!canvas) return;
                 const parentWidth = canvas.parentElement?.clientWidth || 520;
-                const height = Math.max(200, Math.min(300, parentWidth * 0.45));
                 canvas.width = parentWidth;
-                canvas.height = height;
+                canvas.height = Math.max(200, Math.min(300, parentWidth * 0.45));
                 draw(currentValue);
             };
 
             const draw = (value = currentValue) => {
-                if (!ensureContext()) return;
+                if (!ctx) return;
                 currentValue = Number(value);
                 const { width, height } = canvas;
                 ctx.clearRect(0, 0, width, height);
@@ -726,13 +913,14 @@
                 const cx = width / 2;
                 const cy = height - 15;
                 const radius = Math.min(width / 2 - 20, height - 30);
-                ctx.lineCap = 'round';
 
+                ctx.lineCap = 'round';
                 ctx.lineWidth = 16;
-                ctx.strokeStyle = colors.board || '#cbd5e1';
+                ctx.strokeStyle = colors.board;
                 ctx.beginPath();
                 ctx.arc(cx, cy, radius, Math.PI, 0, false);
                 ctx.stroke();
+
                 const segments = [
                     { color: colors.three, start: currentValue - threePointWindow, end: currentValue - (fourPointWindow + 1) },
                     { color: colors.four, start: currentValue - fourPointWindow, end: currentValue + fourPointWindow },
@@ -746,6 +934,7 @@
                 ctx.lineWidth = 26;
                 ctx.shadowColor = 'rgba(15, 23, 42, 0.15)';
                 ctx.shadowBlur = 10;
+
                 segments.forEach(seg => {
                     const sAngle = Math.PI + Math.PI * (seg.start / 100);
                     const eAngle = Math.PI + Math.PI * (seg.end / 100);
@@ -759,47 +948,49 @@
                 const midAngle = Math.PI + Math.PI * (currentValue / 100);
                 const inner = radius - 40;
                 const outer = radius + 12;
-                ctx.strokeStyle = colors.stroke || '#475569';
+                ctx.strokeStyle = colors.stroke;
                 ctx.lineWidth = 2.5;
                 ctx.beginPath();
                 ctx.moveTo(cx + inner * Math.cos(midAngle), cy + inner * Math.sin(midAngle));
                 ctx.lineTo(cx + outer * Math.cos(midAngle), cy + outer * Math.sin(midAngle));
                 ctx.stroke();
 
-                ctx.fillStyle = colors.stroke || '#0f172a';
+                ctx.fillStyle = '#0f172a';
                 ctx.beginPath();
                 ctx.arc(cx + outer * Math.cos(midAngle), cy + outer * Math.sin(midAngle), 5, 0, Math.PI * 2);
                 ctx.fill();
             };
 
-            const init = () => {
-                canvas = document.getElementById('dial-arc');
-                if (!canvas) return;
-                ctx = canvas.getContext('2d');
-                readColors();
-                resize();
-                window.addEventListener('resize', resize);
-            };
-
             return { init, draw, resize };
         })();
 
+        // --- 4. UI Controller ---
         const ui = {
-            render(list = store.getAll()) {
+            render(list = store.getAllFlat()) {
                 const grid = document.getElementById('grid');
                 const empty = document.getElementById('empty');
                 const counter = document.getElementById('total-count');
                 const select = document.getElementById('filter-creator');
+                const datalist = document.getElementById('creator-list');
 
                 grid.innerHTML = '';
                 counter.innerText = list.length;
-                empty.style.display = list.length ? 'none' : 'block';
+
+                if (list.length === 0 && Object.keys(store.data.creators).length === 0) {
+                    empty.style.display = 'block';
+                } else {
+                    empty.style.display = list.length ? 'none' : 'block';
+                    if (list.length === 0) empty.innerHTML = "<h2>No Matches</h2><p>Try a different search.</p>";
+                }
 
                 const currentVal = select.value;
-                const creatorNames = Object.keys(store.data.creators);
+                const creatorNames = Object.keys(store.data.creators).sort();
+
                 select.innerHTML = `<option value="">All Creators</option>` +
                     creatorNames.map(c => `<option value="${c}">${c}</option>`).join('');
                 select.value = currentVal;
+
+                datalist.innerHTML = creatorNames.map(c => `<option value="${c}">`).join('');
 
                 list.forEach(q => {
                     const splitTopic = (str) => (!str) ? ["?", "?"] : (str.includes('↔') ? str.split('↔') : [str, ""]);
@@ -810,8 +1001,8 @@
                     el.className = 'card';
                     el.innerHTML = `
                         <div class="card-actions">
-                            <button class="btn-icon btn-edit" onclick="app.edit('${q.id}')">✎</button>
-                            <button class="btn-icon btn-del" onclick="app.del('${q.id}')">✕</button>
+                            <button class="btn-icon btn-edit" onclick="app.edit('${q._creator}', '${q._key}')">✎</button>
+                            <button class="btn-icon btn-del" onclick="app.del('${q._creator}', '${q._key}')">✕</button>
                         </div>
                         <div class="card-meta"><span class="badge">${q._creator}</span></div>
                         <div class="card-title">${q.question_text.en}</div>
@@ -831,14 +1022,17 @@
                 dialArc.draw(val);
             },
 
-            openModal(q = null) {
+            openModal(q = null, creator = null, key = null) {
                 const overlay = document.getElementById('modal');
                 const form = document.querySelector('form');
                 form.reset();
 
                 if (q) {
-                    document.getElementById('id').value = q.id;
-                    document.getElementById('creator').value = q._creator;
+                    document.getElementById('id').value = q.id || `q_${Date.now()}`;
+                    document.getElementById('original-key').value = key;
+                    document.getElementById('original-creator').value = creator;
+
+                    document.getElementById('creator').value = creator;
                     document.getElementById('q-en').value = q.question_text.en;
                     document.getElementById('q-zh').value = q.question_text.zh;
 
@@ -855,6 +1049,8 @@
                     this.updateDial(q.target_position);
                 } else {
                     document.getElementById('id').value = '';
+                    document.getElementById('original-key').value = '';
+                    document.getElementById('original-creator').value = '';
                     document.getElementById('target').value = 50;
                     this.updateDial(50);
                 }
@@ -868,84 +1064,85 @@
         const app = {
             init() {
                 store.init();
-                ui.render();
+                dialArc.init();
                 document.addEventListener('keydown', (e) => { if (e.key === "Escape") ui.closeModal(); });
             },
             filter() {
                 const term = document.getElementById('search').value.toLowerCase();
                 const cat = document.getElementById('filter-creator').value;
-                const filtered = store.getAll().filter(q => {
+                const filtered = store.getAllFlat().filter(q => {
                     const textMatch = q.question_text.en.toLowerCase().includes(term) || q.question_text.zh.includes(term);
                     const catMatch = cat ? q._creator === cat : true;
                     return textMatch && catMatch;
                 });
                 ui.render(filtered);
             },
-            save(e) {
+            async save(e) {
                 e.preventDefault();
-                const formData = {
-                    id: document.getElementById('id').value || `q_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-                    creator: document.getElementById('creator').value.trim(),
-                    q_en: document.getElementById('q-en').value.trim(),
-                    q_zh: document.getElementById('q-zh').value.trim(),
-                    l_en: document.getElementById('left-en').value.trim(),
-                    r_en: document.getElementById('right-en').value.trim(),
-                    l_zh: document.getElementById('left-zh').value.trim(),
-                    r_zh: document.getElementById('right-zh').value.trim(),
-                    target: parseInt(document.getElementById('target').value)
-                };
 
-                const newQuestion = {
-                    id: formData.id,
-                    target_position: formData.target,
-                    question_text: { en: formData.q_en, zh: formData.q_zh },
-                    topic_pair: {
-                        en: `${formData.l_en} ↔ ${formData.r_en}`,
-                        zh: `${formData.l_zh} ↔ ${formData.r_zh}`
-                    },
-                    question_creator: formData.creator
-                };
+                const btn = e.target.querySelector('button[type="submit"]');
+                const oldTxt = btn.innerText;
+                btn.disabled = true; btn.innerText = "Saving...";
 
-                store.upsert(formData.creator, newQuestion);
-                ui.closeModal();
-                ui.render();
-                app.filter();
+                try {
+                    const creator = document.getElementById('creator').value.trim();
+                    if (!creator) throw new Error("Creator required");
+
+                    const formData = {
+                        id: document.getElementById('id').value || `q_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+                        origCreator: document.getElementById('original-creator').value,
+                        origKey: document.getElementById('original-key').value,
+                        q_en: document.getElementById('q-en').value.trim(),
+                        q_zh: document.getElementById('q-zh').value.trim(),
+                        l_en: document.getElementById('left-en').value.trim(),
+                        r_en: document.getElementById('right-en').value.trim(),
+                        l_zh: document.getElementById('left-zh').value.trim(),
+                        r_zh: document.getElementById('right-zh').value.trim(),
+                        target: parseInt(document.getElementById('target').value)
+                    };
+
+                    const newQuestion = {
+                        id: formData.id,
+                        target_position: formData.target,
+                        question_text: { en: formData.q_en, zh: formData.q_zh },
+                        topic_pair: {
+                            en: `${formData.l_en} ↔ ${formData.r_en}`,
+                            zh: `${formData.l_zh} ↔ ${formData.r_zh}`
+                        },
+                        question_creator: creator
+                    };
+
+                    await store.upsert(creator, newQuestion, formData.origCreator, formData.origKey);
+                    ui.closeModal();
+                } catch (err) {
+                    alert("Save Failed: " + err.message);
+                } finally {
+                    btn.disabled = false; btn.innerText = oldTxt;
+                }
             },
-            edit(id) { const q = store.get(id); if (q) ui.openModal(q); },
-            del(id) { if (confirm("Delete this question?")) { store.delete(id); ui.render(); app.filter(); } }
-        };
-
-        const io = {
-            export() {
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store.data, null, 2));
-                const node = document.createElement('a');
-                node.setAttribute("href", dataStr);
-                node.setAttribute("download", "question_bank.json");
-                document.body.appendChild(node);
-                node.click();
-                node.remove();
+            edit(creator, key) {
+                const q = store.get(creator, key);
+                if (q) ui.openModal(q, creator, key);
             },
-            import(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    try {
-                        const json = JSON.parse(ev.target.result);
-                        if (!json.creators) throw new Error("Invalid JSON structure");
-                        if (confirm(`Load ${json.total_questions || "file"} questions?`)) {
-                            store.data = json;
-                            store.persist();
-                            ui.render();
-                        }
-                    } catch (err) { alert("Error: " + err.message); }
-                    e.target.value = "";
-                };
-                reader.readAsText(file);
+            async del(creator, key) {
+                if (confirm("Delete this question from Cloud?")) {
+                    await store.delete(creator, key);
+                }
             }
         };
 
-        dialArc.init();
+        const io = {
+            exportBackup() {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store.data, null, 2));
+                const node = document.createElement('a');
+                node.setAttribute("href", dataStr);
+                node.setAttribute("download", "wavelength_backup_" + new Date().toISOString().slice(0, 10) + ".json");
+                document.body.appendChild(node);
+                node.click();
+                node.remove();
+            }
+        };
+
         app.init();
     </script>
 </body>
