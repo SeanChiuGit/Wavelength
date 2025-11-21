@@ -3,9 +3,9 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wavelength 远程版</title>
 
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="src/css/style.css">
 
   <style>
+    /* --- Navigation & Menu Styles (Shared) --- */
     .nav-container {
       position: fixed;
       top: 20px;
@@ -45,7 +46,8 @@
     }
 
     .nav-button:hover {
-      color: #667eea;
+      background: #4a64f7;
+      color: white;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(74, 100, 247, 0.2);
     }
@@ -54,7 +56,6 @@
       border: 2px solid #4a64f7;
     }
 
-    /* 汉堡菜单按钮 */
     .menu-toggle {
       display: none;
       position: fixed;
@@ -96,7 +97,7 @@
       transform: translateY(-7px) rotate(-45deg);
     }
 
-    /* 平板尺寸 */
+    /* Responsive Media Queries */
     @media (max-width: 768px) {
       .nav-container {
         top: 10px;
@@ -116,7 +117,6 @@
       }
     }
 
-    /* 手机尺寸 - 汉堡菜单 */
     @media (max-width: 480px) {
       .menu-toggle {
         display: flex;
@@ -165,24 +165,20 @@
     }
   </style>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-  <!-- ✅ 礼炮特效库 -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 
 
 <body>
-  <!-- 汉堡菜单按钮 -->
   <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
     <span></span>
     <span></span>
     <span></span>
   </button>
 
-  <!-- 导航按钮 -->
   <div class="nav-container" id="nav-container">
     <a href="singleplayer.html" data-i18n="singlePlayerMode" class="nav-button">🎮 单人模式</a>
     <a href="question-editor.html" data-i18n="questionEditor" class="nav-button">📝 题库编辑</a>
@@ -223,7 +219,6 @@
       </div>
     </div>
 
-    <!-- ⏰ 时间设置面板 -->
     <div id="time-settings"
       style="display: none; margin: 20px auto; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px; max-width: 400px;">
       <h3 style="margin: 0 0 10px 0; font-size: 16px;" data-i18n="timeSettings">⚙️ 时间设置</h3>
@@ -243,48 +238,51 @@
       </div>
     </div>
 
-
-
     <div class="dimension">
       <span id="left-label" data-i18n="loading">加载中...</span>
       <canvas id="arcCanvas" width="400" height="250"></canvas>
       <span id="right-label" data-i18n="loading">加载中...</span>
     </div>
 
-
-
     <p id="game-step">等待开始游戏...</p>
 
-    <!-- ✅ 房主开始游戏按钮 -->
     <button id="startGameBtn" class="button-9" role="button" onclick="hostStartGame()" style="display:none;">🚀
       开始游戏</button>
 
-    <!-- ✅ 输入提示词区域（当前出题方） -->
     <div id="hint-input" style="display:none;">
       <input type="text" id="hintBox" placeholder="输入提示词">
       <button class="button-9" role="button" onclick="confirmHint()">确认提示</button>
     </div>
 
-    <!-- ✅ 猜测区域（当前猜测方） -->
-    <div id="guess-section" style="display:none;">
+    <div id="guess-section" style="display:none; margin-right: 10px;">
       <p>提示词：<span id="hint">（等待提示）</span></p>
       <input type="range" id="guessSlider" min="0" max="100" value="50">
       <button class="button-9" role="button" onclick="submitGuess()">👍🏿 提交</button>
     </div>
 
-    <!-- 倒计时 -->
     <div id="countdown" style="display:none; font-weight: bold; margin-top: 10px; font-size: 18px;"></div>
 
     <p id="result"></p>
 
-    <!-- ✅ 下一轮按钮：开始新一轮并切换角色 -->
     <button id="nextRoundBtn" class="button-9" role="button" onclick="nextRound()" style="display:none;">🔁 下一轮</button>
   </div>
 
-  <!-- ✅ 🎊 庆祝音效 -->
-  <audio id="celebrateSound" src="assets/audio/partypop.mp3" preload="auto"></audio>
+  <div style="text-align: center;">
+    <div id="rules">
+      <h3 id="rules-title" data-i18n="multiplayerRulesTitle">游戏规则</h3>
+      <p data-i18n="multiplayerRule1">1. 房主点击"创建房间"，分享房间号。</p>
+      <p data-i18n="multiplayerRule2">2. 出题方输入提示词，猜测方拖动滑条猜位置。</p>
+      <p data-i18n="multiplayerRule3">3. 尝试理解彼此的思路，挑战默契极限！🔥</p>
+    </div>
+  </div>
 
-  <!-- 汉堡菜单脚本 -->
+  <audio id="celebrateSound" src="assets/audio/partypop.mp3" preload="auto"></audio>
+  <audio id="moveSound0" src="assets/audio/tick.mp3" preload="auto"></audio>
+  <audio id="moveSound1" src="assets/audio/tick.mp3" preload="auto"></audio>
+  <audio id="moveSound2" src="assets/audio/tick.mp3" preload="auto"></audio>
+  <audio id="moveSound3" src="assets/audio/tick.mp3" preload="auto"></audio>
+  <audio id="moveSound4" src="assets/audio/tick.mp3" preload="auto"></audio>
+
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const menuToggle = document.getElementById('menu-toggle');
@@ -314,24 +312,8 @@
     });
   </script>
 
-  <!-- 语言配置 -->
   <script src="src/js/lang.js"></script>
-  <!-- ✅ 游戏逻辑脚本 -->
   <script src="src/js/multiplayer.js"></script>
 </body>
-<div style="text-align: center;">
-  <div id="rules">
-    <h3 id="rules-title" data-i18n="multiplayerRulesTitle">游戏规则</h3>
-    <p data-i18n="multiplayerRule1">1. 房主点击"创建房间"，分享房间号。</p>
-    <p data-i18n="multiplayerRule2">2. 出题方输入提示词，猜测方拖动滑条猜位置。</p>
-    <p data-i18n="multiplayerRule3">3. 尝试理解彼此的思路，挑战默契极限！🔥</p>
-  </div>
-</div>
 
 </html>
-
-<audio id="moveSound0" src="assets/audio/tick.mp3" preload="auto"></audio>
-<audio id="moveSound1" src="assets/audio/tick.mp3" preload="auto"></audio>
-<audio id="moveSound2" src="assets/audio/tick.mp3" preload="auto"></audio>
-<audio id="moveSound3" src="assets/audio/tick.mp3" preload="auto"></audio>
-<audio id="moveSound4" src="assets/audio/tick.mp3" preload="auto"></audio>

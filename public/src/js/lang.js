@@ -3,13 +3,12 @@ const translations = {
 	zh: {
 		// 主标题
 		mainTitle: "一个人也能玩",
-		modeSwitch: "切换到多人模式",
+		modeSwitch: "🧑‍🧑‍🧒‍🧒 多人模式",
 		questionEditor: "📝 题库编辑",
 
 		// 出题者选择
 		selectCreator: "选择出题者：",
 		playerBank: "玩家题库",
-		iWillCreate: "✨ 我也来出题",
 
 		// 创作者描述
 		creatorDesc: {
@@ -21,48 +20,36 @@ const translations = {
 		// 游戏界面
 		guessWhat: "猜猜创作者怎么想",
 		creatorLabel: "出题者：",
-		dragSlider: "拖动滑条或点击弧线进行猜测",
-		submitAnswer: "提交答案",
+		dragSlider: "拖动滑条进行猜测",
+		submitAnswer: "提交",
 		nextQuestion: "下一题",
-		backToMenu: "⬅️ 返回主菜单",
+		backToMenu: "返回主页",
 
 		// 结果反馈
 		perfect: "完美命中！",
 		veryClose: "非常接近！",
-		notBad: "还不错",
-		tooFar: "有点远了",
+		notBad: "还不错～",
+		tooFar: "有点远了～",
 
 		// 反馈调查
 		howWasIt: "这道题怎么样？",
-		thanksUp: "👍 感谢！",
-		thanksDown: "👎 已记录",
+		thanksUp: "👍  感谢！",
+		thanksDown: "👎  已记录",
 		positive: "好评",
-
-		// 我也来出题
-		enterName: "请输入你的名字（将显示为出题者）：",
-		nameRequired: "需要输入名字才能出题哦！",
-		markPosition: "🎨 标记你认为答案应该在的位置",
-		progress: "🎨 第 {current}/{total} 题：拖动滑条标记答案位置",
-		recorded: "✅ 第 {count} 题已记录！",
-		continuing: "继续下一题...",
-		thanksForCreating: "感谢出题！",
-		willAppear: "{name}，你出的题目很快就会出现在玩家题库中！",
-		completed: "已完成 {count} 道题目的标记",
-		returnHome: "🏠 返回主菜单",
 
 		// 玩家题库
 		guessPlayers: "猜猜其他玩家怎么想",
-		noPlayerQuestions: "玩家题库暂时没有题目，快去「我也来出题」吧！",
+		noPlayerQuestions: "玩家题库暂时没有题目",
 		loadFailed: "加载失败，请稍后重试",
 
 		// 规则说明
 		rulesTitle: "游戏规则",
 		rule1: "1. 选择出题者，猜猜他们会怎么想",
 		rule2: "2. 看题目后，在频谱上猜测答案位置",
-		rule3: "3. 或者选择「我也来出题」，分享你的想法！🎨",
+		rule3: "3. 尝试理解出题者的思路，挑战默契极限！🔥",
 
 		// 多人模式
-		singlePlayerMode: "🎮 单人模式",
+		singlePlayerMode: "👤 单人模式",
 		multiplayerRulesTitle: "游戏规则",
 		multiplayerRule1: "1. 房主点击「创建房间」，分享房间号。",
 		multiplayerRule2: "2. 出题方输入提示词，猜测方拖动滑条猜位置。",
@@ -88,7 +75,6 @@ const translations = {
 		// Creator selection
 		selectCreator: "Select Creator:",
 		playerBank: "Player Bank",
-		iWillCreate: "✨ I'll Create",
 
 		// Creator descriptions
 		creatorDesc: {
@@ -117,21 +103,9 @@ const translations = {
 		thanksDown: "👎 Recorded",
 		positive: "positive",
 
-		// I'll create
-		enterName: "Enter your name (will be shown as creator):",
-		nameRequired: "Name is required to create questions!",
-		markPosition: "🎨 Mark where you think the answer should be",
-		progress: "🎨 Question {current}/{total}: Drag slider to mark position",
-		recorded: "✅ Question {count} recorded!",
-		continuing: "Continuing...",
-		thanksForCreating: "Thanks for Creating!",
-		willAppear: "{name}, your questions will appear in the player bank soon!",
-		completed: "Completed {count} questions",
-		returnHome: "🏠 Back to Menu",
-
 		// Player bank
 		guessPlayers: "Guess What Other Players Think",
-		noPlayerQuestions: "No questions in player bank yet. Try 'I'll Create'!",
+		noPlayerQuestions: "No questions in player bank yet.",
 		loadFailed: "Failed to load, please try again later",
 
 		// Rules
@@ -139,7 +113,8 @@ const translations = {
 		rule1: "1. Select a creator and guess what they think",
 		rule2:
 			"2. After viewing the question, guess the answer position on the spectrum",
-		rule3: "3. Or select 'I'll Create' to share your thoughts! 🎨",
+		rule3:
+			"3. Try to understand the creator's thoughts, challenge yourself! 🔥",
 
 		// Multiplayer mode
 		singlePlayerMode: "🎮 Single Player",

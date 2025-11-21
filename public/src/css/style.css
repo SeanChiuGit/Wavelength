@@ -179,22 +179,78 @@ body {
 	padding-left: 2px;
 }
 
+/* 🎯 弧线区域容器 */
 .dimension {
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	gap: 10px;
-	margin-bottom: 10px;
+	margin: 0 auto 10px;
+	padding: 15px 10px;
+	width: 90%;
+	max-width: 400px;
+	box-sizing: border-box;
+	background: linear-gradient(
+		135deg,
+		rgba(255, 255, 255, 0.9) 0%,
+		rgba(248, 250, 255, 0.95) 100%
+	);
+	border-radius: 0 0 20px 20px;
+	box-shadow: 0 4px 20px rgba(74, 100, 247, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05),
+		inset 0 1px 0 rgba(255, 255, 255, 0.8);
+	border: 1px solid rgba(74, 100, 247, 0.1);
+	position: relative;
+	overflow: visible;
 }
 
+.dimension::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: linear-gradient(
+		to right,
+		#5a7ae7 0%,
+		#9b88ff 25%,
+		#ffcc70 50%,
+		#ff9966 75%,
+		#ff7a7e 100%
+	);
+	border-radius: 0;
+	z-index: 0;
+	pointer-events: none;
+}
+
+/* 确保 dimension 内的元素在装饰条之上 */
+.dimension > * {
+	position: relative;
+	z-index: 1;
+}
+
+/* 🖼️ 弧线画布样式 */
 canvas {
-	border: 1px solid #ccc;
+	border: none;
+	border-radius: 12px;
+	background: transparent;
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
+	transition: filter 0.3s ease;
 }
 
-#left-label,
+canvas:hover {
+	filter: drop-shadow(0 4px 8px rgba(74, 100, 247, 0.15));
+}
+
+#left-label {
+	/* 调大增加labels间距 */
+	margin-right: 20px;
+	flex-shrink: 0;
+}
+
 #right-label {
-	margin-left: 8px;
-	margin-right: 8px;
+	margin-left: 20px;
+	flex-shrink: 0;
 }
 
 .dimension img {
@@ -203,10 +259,109 @@ canvas {
 	vertical-align: middle;
 }
 
+/* 🎚️ 现代化猜测滑条样式 */
 #guessSlider {
 	width: 75%;
-	margin-top: 20px;
-	margin-right: 13px;
+	margin-top: 10px;
+	margin-bottom: 15px;
+	margin-left: 15px;
+	margin-right: 15px;
+	-webkit-appearance: none;
+	appearance: none;
+	height: 12px;
+	background: linear-gradient(
+		to right,
+		#5a7ae7 0%,
+		#9b88ff 25%,
+		#ffcc70 50%,
+		#ff9966 75%,
+		#ff7a7e 100%
+	);
+	border-radius: 10px;
+	outline: none;
+	cursor: pointer;
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+	transition: all 0.3s ease;
+	position: relative;
+}
+
+#guessSlider:hover {
+	transform: scaleY(1.1);
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1),
+		0 4px 12px rgba(74, 100, 247, 0.2);
+}
+
+#guessSlider:active {
+	transform: scaleY(1.15);
+}
+
+/* WebKit 滑块按钮 (Chrome, Safari, Edge) */
+#guessSlider::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 28px;
+	height: 28px;
+	background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
+	border: 3px solid #4a64f7;
+	border-radius: 50%;
+	cursor: grab;
+	box-shadow: 0 4px 12px rgba(74, 100, 247, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15),
+		inset 0 2px 4px rgba(255, 255, 255, 0.8);
+	transition: all 0.2s ease;
+	position: relative;
+}
+
+#guessSlider::-webkit-slider-thumb:hover {
+	transform: scale(1.15);
+	border-color: #ff6f00;
+	box-shadow: 0 6px 16px rgba(255, 111, 0, 0.5), 0 3px 8px rgba(0, 0, 0, 0.2),
+		inset 0 2px 4px rgba(255, 255, 255, 0.8);
+}
+
+#guessSlider::-webkit-slider-thumb:active {
+	cursor: grabbing;
+	transform: scale(1.2);
+	border-color: #ff6f00;
+	box-shadow: 0 8px 20px rgba(255, 111, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+/* Firefox 滑块按钮 */
+#guessSlider::-moz-range-thumb {
+	width: 24px;
+	height: 24px;
+	background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
+	border: 3px solid #4a64f7;
+	border-radius: 50%;
+	cursor: grab;
+	box-shadow: 0 4px 12px rgba(74, 100, 247, 0.4), 0 2px 6px rgba(0, 0, 0, 0.15),
+		inset 0 2px 4px rgba(255, 255, 255, 0.8);
+	transition: all 0.2s ease;
+}
+
+#guessSlider::-moz-range-thumb:hover {
+	transform: scale(1.15);
+	border-color: #ff6f00;
+	box-shadow: 0 6px 16px rgba(255, 111, 0, 0.5), 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+#guessSlider::-moz-range-thumb:active {
+	cursor: grabbing;
+	transform: scale(1.2);
+	border-color: #ff6f00;
+}
+
+/* Firefox 轨道 */
+#guessSlider::-moz-range-track {
+	height: 12px;
+	background: linear-gradient(
+		to right,
+		#5a7ae7 0%,
+		#9b88ff 25%,
+		#ffcc70 50%,
+		#ff9966 75%,
+		#ff7a7e 100%
+	);
+	border-radius: 10px;
 }
 
 #control-panel {
@@ -314,6 +469,7 @@ canvas {
 	background-color: white;
 	border-radius: 12px;
 	padding: 15px 35px;
+	margin-bottom: 20px;
 	display: inline-block; /* ✅ 根据内容自动适应宽度 */
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 	font-size: 15px;
@@ -546,10 +702,12 @@ canvas {
 /* 🎯 猜测区域提示词醒目样式 */
 #guess-section p {
 	background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);
-	padding: 10px 20px;
+	padding: 8px 16px;
 	border-radius: 10px;
 	margin: 15px auto;
-	max-width: 70%;
+	width: fit-content;
+	max-width: 60%;
+	box-sizing: border-box;
 	box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4),
 		0 2px 8px rgba(255, 153, 102, 0.3);
 	border: 2px solid rgba(255, 255, 255, 0.5);

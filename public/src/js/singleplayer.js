@@ -24,11 +24,6 @@ let currentQuestion = null;
 let currentCreator = "Sean";
 let sessionId = generateSessionId();
 let startTime = null;
-let isCreatorMode = false; // 是否处于"我也来出题"模式
-let creatorModeQuestions = []; // 存储玩家未见过的题目
-let creatorName = ""; // 玩家出题者名字
-let createdQuestionsCount = 0; // 已出题数量
-const MAX_CREATOR_QUESTIONS = 3; // 最多出3道题
 
 // -------------------------
 // 🎯 游戏核心函数
@@ -100,7 +95,6 @@ async function startGame(creator = "Sean") {
 
 	currentCreator = creator;
 	sessionId = generateSessionId();
-	isCreatorMode = false;
 
 	// 隐藏出题者选择，显示游戏区域
 	document.getElementById("creator-selection").style.display = "none";
@@ -111,17 +105,9 @@ async function startGame(creator = "Sean") {
 	if (creator === "Players") {
 		loadPlayerQuestions();
 	} else {
-		// 显示创作者描述
-		const creatorInfo = questionBank.creators[creator];
-		const creatorDesc = getLocalizedText(creatorInfo.description);
 		document.getElementById("current-creator").innerText = `${t(
 			"creatorLabel"
 		)}${creator}`;
-		document.getElementById(
-			"game-subtitle"
-		).innerHTML = `<span style="color: #999; font-size: 14px;">${creatorDesc}</span><br>${t(
-			"guessWhat"
-		)} 🤔`;
 
 		loadNormalQuestion();
 	}
@@ -132,9 +118,6 @@ async function loadPlayerQuestions() {
 	document.getElementById("current-creator").innerText = `${t(
 		"creatorLabel"
 	)}${t("playerBank")}`;
-	document.getElementById("game-subtitle").innerText = `${t(
-		"guessPlayers"
-	)} 🎮`;
 	document.getElementById("creator-controls").style.display = "none";
 
 	try {
@@ -195,10 +178,12 @@ function displayResult(emoji, result, guess) {
 	document.getElementById("result-section").style.display = "block";
 	document.getElementById("feedback-survey").style.display = "block";
 
-	// 简化的结果显示
+	// 简化的结果显示 - 一行显示
 	document.getElementById("result-text").innerHTML = `
-		<h1 style="font-size: 48px; margin: 20px 0;">${emoji}</h1>
-		<h2 style="margin: 10px 0;">${result}</h2>
+		<h2 style="margin: 10px 0; padding-left:7px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+			<span style="font-size: 1em;">${emoji}</span>
+			<span>${result}</span>
+		</h2>
 	`;
 
 	// 绘制带答案的画布
@@ -233,7 +218,7 @@ function submitFeedback(rating) {
 	// 显示感谢消息
 	const feedbackDiv = document.getElementById("feedback-survey");
 	if (rating === "up") {
-		feedbackDiv.innerHTML = `<p style="color: #4a64f7; font-size: 16px;">${t(
+		feedbackDiv.innerHTML = `<p style="color: #4a64f7; font-family: 'Noto Sans SC'; font-weight:bold; font-size: 16px;">${t(
 			"thanksUp"
 		)}</p>`;
 	} else {
@@ -396,173 +381,8 @@ arcCanvas.addEventListener("click", (e) => {
 	}
 });
 
-// -------------------------
-// 🎨 "我也来出题" 功能
-// -------------------------
-
-// 启动创作者模式 - 先询问名字
-function startCreatorMode() {
-	const name = prompt(t("enterName"));
-	if (!name || name.trim() === "") {
-		alert(t("nameRequired"));
-		return;
-	}
-
-	creatorName = name.trim();
-	isCreatorMode = true;
-	createdQuestionsCount = 0;
-
-	// 收集所有题目并随机选择3道
-	const allQuestions = [];
-	Object.keys(questionBank.creators).forEach((creator) => {
-		questionBank.creators[creator].questions.forEach((q) => {
-			allQuestions.push({ ...q, originalCreator: creator });
-		});
-	});
-
-	// 随机打乱并只取3道题
-	const shuffled = allQuestions.sort(() => Math.random() - 0.5);
-	creatorModeQuestions = shuffled.slice(0, MAX_CREATOR_QUESTIONS);
-
-	document.getElementById("creator-selection").style.display = "none";
-	document.getElementById("game-area").style.display = "block";
-	document.getElementById("current-creator").innerText = `${t(
-		"creatorLabel"
-	)}${creatorName}`;
-	document.getElementById("game-subtitle").innerText = t("markPosition");
-	document.getElementById("creator-controls").style.display = "none";
-
-	loadCreatorQuestion();
-}
-
-// 加载创作者模式题目
-async function loadCreatorQuestion() {
-	if (
-		creatorModeQuestions.length === 0 ||
-		createdQuestionsCount >= MAX_CREATOR_QUESTIONS
-	) {
-		showCreatorThankYou();
-		return;
-	}
-
-	currentQuestion = creatorModeQuestions.shift();
-	startTime = Date.now();
-
-	// 更新UI - 使用多语言文本
-	const topicPairText = getLocalizedText(currentQuestion.topic_pair);
-	const topicParts = topicPairText.split(" ↔ ");
-	document.getElementById("left-label").innerText = topicParts[0];
-	document.getElementById("right-label").innerText = topicParts[1];
-
-	// 显示题目和评价统计
-	const questionText = getLocalizedText(currentQuestion.question_text);
-	const voteStats = await displayQuestionVotes(currentQuestion.id);
-	document.getElementById("question-text").innerHTML = questionText + voteStats;
-
-	document.getElementById("guessSlider").value = 50;
-
-	// 显示进度
-	document.getElementById("guess-instruction").innerText = t("progress", {
-		current: createdQuestionsCount + 1,
-		total: MAX_CREATOR_QUESTIONS,
-	});
-
-	document.getElementById("result-section").style.display = "none";
-	document.getElementById("guess-section").style.display = "block";
-	document.getElementById("feedback-survey").style.display = "none";
-
-	drawArc(false, false);
-}
-
-// 提交创作者模式的范围
-function submitCreatorGuess() {
-	const targetPosition = parseInt(document.getElementById("guessSlider").value);
-	const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
-
-	createdQuestionsCount++;
-
-	// 保存到 Firebase - 作为新题目
-	const questionId = `player_${creatorName}_${Date.now()}`;
-	database.ref("player_questions/" + questionId).set({
-		id: questionId,
-		topic_pair: currentQuestion.topic_pair,
-		target_position: targetPosition,
-		question_text: currentQuestion.question_text,
-		question_creator: creatorName,
-		created_at: new Date().toISOString(),
-		session_id: sessionId,
-		original_question_id: currentQuestion.id,
-		original_creator: currentQuestion.originalCreator,
-		time_taken_seconds: parseFloat(timeTaken),
-	});
-
-	// 显示确认
-	document.getElementById("result-text").innerHTML = `
-		<h2 style="margin: 20px 0;">${t("recorded", {
-			count: createdQuestionsCount,
-		})}</h2>
-		<p style="font-size: 16px; color: #666;">${t("continuing")}</p>
-	`;
-
-	document.getElementById("guess-section").style.display = "none";
-	document.getElementById("result-section").style.display = "block";
-
-	// 1秒后自动进入下一题
-	setTimeout(() => {
-		loadCreatorQuestion();
-	}, 1000);
-}
-
-// 显示感谢页面
-function showCreatorThankYou() {
-	document.getElementById("result-text").innerHTML = `
-		<h1 style="font-size: 42px; margin: 20px 0;">🎉</h1>
-		<h2 style="margin: 20px 0;">${t("thanksForCreating")}</h2>
-		<p style="font-size: 18px; color: #4a64f7; margin: 15px 0;">
-			${t("willAppear", { name: `<strong>${creatorName}</strong>` })}
-		</p>
-		<p style="font-size: 16px; color: #666; margin: 10px 0;">
-			${t("completed", { count: MAX_CREATOR_QUESTIONS })}
-		</p>
-	`;
-
-	document.getElementById("guess-section").style.display = "none";
-	document.getElementById("result-section").style.display = "block";
-	document.getElementById("feedback-survey").style.display = "none";
-
-	// 改变"下一题"按钮为"返回主菜单"
-	const nextBtn = document.querySelector("#result-section .button-9");
-	if (nextBtn) {
-		nextBtn.innerText = t("returnHome");
-		nextBtn.onclick = () => {
-			isCreatorMode = false;
-			backToMenu();
-		};
-	}
-}
-
-// 包装 submitGuess 以支持创作者模式
-window.submitGuess = function () {
-	if (isCreatorMode) {
-		submitCreatorGuess();
-	} else {
-		submitNormalGuess();
-	}
-};
-
-// 包装 loadNextQuestion 以支持创作者模式和玩家题库
-window.loadNextQuestion = function () {
-	if (isCreatorMode) {
-		loadCreatorQuestion();
-	} else if (currentCreator === "Players") {
-		loadPlayerQuestions();
-	} else {
-		loadNormalQuestion();
-	}
-};
-
-// 原始的提交猜测函数（重命名）
-function submitNormalGuess() {
+// 提交猜测
+function submitGuess() {
 	const guess = parseInt(document.getElementById("guessSlider").value);
 	const timeTaken = ((Date.now() - startTime) / 1000).toFixed(1);
 
@@ -618,10 +438,10 @@ async function displayQuestionVotes(questionId) {
 			const total = votes.upvotes + votes.downvotes;
 			const upPercent = Math.round((votes.upvotes / total) * 100);
 
-			return `<div style="font-size: 14px; color: #666; margin: 10px 0;">
-				<span style="color: #4a64f7;">👍 ${votes.upvotes}</span>
+			return `<div style="font-size: 14px; color: white; margin: 10px 0;">
+				<span style="color: white;">👍 ${votes.upvotes}</span>
 				<span style="margin: 0 5px;">|</span>
-				<span style="color: #ff6f00;">👎 ${votes.downvotes}</span>
+				<span style="color: white;">👎 ${votes.downvotes}</span>
 				<span style="margin-left: 10px;">(${upPercent}% ${t("positive")})</span>
 			</div>`;
 		}
@@ -632,7 +452,16 @@ async function displayQuestionVotes(questionId) {
 	}
 }
 
-// 原始的加载下一题函数（重命名）
+// 加载下一题
+function loadNextQuestion() {
+	if (currentCreator === "Players") {
+		loadPlayerQuestions();
+	} else {
+		loadNormalQuestion();
+	}
+}
+
+// 加载普通题目
 async function loadNormalQuestion() {
 	if (!questionBank) return;
 

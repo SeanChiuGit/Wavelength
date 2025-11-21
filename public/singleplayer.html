@@ -3,9 +3,9 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wavelength - 一个人也能玩</title>
 
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -14,159 +14,13 @@
 
   <link rel="stylesheet" href="src/css/style.css">
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-  <!-- ✅ 礼炮特效库 -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
-    /* 单人模式简化样式 */
-    #creator-selection {
-      margin: 30px 0;
-    }
-
-    /* Sean - 优雅蓝色 */
-    .creator-btn.sean {
-      background: linear-gradient(135deg, #4a90e2 0%, #67b3f5 100%);
-      font-family: 'Pacifico', cursive;
-      font-size: 22px;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .creator-btn.sean:hover {
-      background: linear-gradient(135deg, #3a7fc2 0%, #57a3e5 100%);
-      transform: translateY(-3px) scale(1.05) rotate(-2deg);
-    }
-
-    /* Charles - 深紫色 */
-    .creator-btn.charles {
-      background: linear-gradient(135deg, #7b68ee 0%, #9b88ff 100%);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 20px;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-      letter-spacing: 2px;
-    }
-
-    .creator-btn.charles:hover {
-      background: linear-gradient(135deg, #6b58de 0%, #8b78ef 100%);
-      transform: translateY(-3px) scale(1.05);
-    }
-
-    /* Brus - 橙红色 */
-    .creator-btn.brus {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ffa06b 100%);
-      font-family: 'Caveat', cursive;
-      font-size: 26px;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    }
-
-    .creator-btn.brus:hover {
-      background: linear-gradient(135deg, #ef5b5b 0%, #ff906b 100%);
-      transform: translateY(-3px) scale(1.05) rotate(2deg);
-    }
-
-    /* 玩家题库 - 绿色 */
-    .creator-btn.players {
-      background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
-      font-family: 'Noto Sans SC', sans-serif;
-      font-size: 20px;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      font-weight: 700;
-    }
-
-    .creator-btn.players:hover {
-      background: linear-gradient(135deg, #42b40a 0%, #63c12d 100%);
-      transform: translateY(-3px) scale(1.05);
-    }
-
-    /* 我也来出题 - 特殊样式 */
-    .creator-btn.my-turn {
-      background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-      font-family: 'ZCOOL XiaoWei', cursive;
-      font-size: 20px;
-      color: #333;
-      text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
-      border: 3px solid #ffaa00;
-      animation: pulse-gold 2s ease-in-out infinite;
-    }
-
-    .creator-btn.my-turn:hover {
-      background: linear-gradient(135deg, #ffcc00 0%, #ffdd3e 100%);
-      transform: translateY(-3px) scale(1.08);
-      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.6);
-    }
-
-    @keyframes pulse-gold {
-
-      0%,
-      100% {
-        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-      }
-
-      50% {
-        box-shadow: 0 6px 25px rgba(255, 215, 0, 0.7);
-      }
-    }
-
-    .creator-btn {
-      margin: 10px;
-      padding: 15px 30px;
-      font-size: 18px;
-      width: 150px;
-      height: auto !important;
-      transition: all 0.3s ease;
-      border-radius: 12px;
-    }
-
-    #game-area {
-      display: none;
-    }
-
-    #question-text {
-      background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      font-size: 24px;
-      font-weight: 800;
-      margin: 20px 0;
-      box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4);
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-    }
-
-    #result-section {
-      display: none;
-      margin: 20px 0;
-    }
-
-    #feedback-survey {
-      display: none;
-      margin: 20px 0;
-      padding: 15px;
-    }
-
-    .feedback-btn {
-      margin: 0 10px;
-      padding: 10px 20px;
-      font-size: 24px;
-      background: transparent;
-      border: 2px solid #ddd;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .feedback-btn:hover {
-      transform: scale(1.2);
-      border-color: #4a64f7;
-    }
-
+    /* --- Navigation & Menu Styles (Shared) --- */
     .nav-container {
       position: fixed;
       top: 20px;
@@ -197,7 +51,8 @@
     }
 
     .nav-button:hover {
-      color: #667eea;
+      background: #4a64f7;
+      color: white !important;
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(74, 100, 247, 0.2);
     }
@@ -206,7 +61,31 @@
       border: 2px solid #4a64f7;
     }
 
-    /* 汉堡菜单按钮 */
+    #nextQuestion {
+      color: #ff6f00;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 10px 20px;
+      background: white;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      display: inline-block;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: inherit;
+      white-space: nowrap;
+      margin-top: 20px;
+    }
+
+    #nextQuestion:hover {
+      background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
+    }
+
     .menu-toggle {
       display: none;
       position: fixed;
@@ -248,7 +127,187 @@
       transform: translateY(-7px) rotate(-45deg);
     }
 
-    /* 平板尺寸 */
+    /* --- Single Player Specific Styles --- */
+    #creator-selection {
+      margin: 30px 0;
+    }
+
+    .creator-btn {
+      margin: 10px;
+      padding: 15px 30px;
+      font-size: 18px;
+      width: 150px;
+      height: auto !important;
+      transition: all 0.3s ease;
+      border-radius: 12px;
+    }
+
+    /* Sean - 优雅蓝色 */
+    .creator-btn.sean {
+      background: linear-gradient(135deg, #4a90e2 0%, #67b3f5 100%);
+      font-family: 'Pacifico', cursive;
+      font-size: 22px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .creator-btn.sean:hover {
+      background: linear-gradient(135deg, #3a7fc2 0%, #57a3e5 100%);
+      transform: translateY(-3px) scale(1.05) rotate(-2deg);
+    }
+
+    /* Charles - 深紫色 */
+    .creator-btn.charles {
+      background: linear-gradient(135deg, #7b68ee 0%, #9b88ff 100%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 20px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      letter-spacing: 2px;
+      min-height: 56px;
+    }
+
+    .creator-btn.charles:hover {
+      background: linear-gradient(135deg, #6b58de 0%, #8b78ef 100%);
+      transform: translateY(-3px) scale(1.05) rotate(2deg);
+    }
+
+    /* Brus - 橙红色 */
+    .creator-btn.brus {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ffa06b 100%);
+      font-family: 'Caveat', cursive;
+      font-size: 26px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .creator-btn.brus:hover {
+      background: linear-gradient(135deg, #ef5b5b 0%, #ff906b 100%);
+      transform: translateY(-3px) scale(1.05) rotate(2deg);
+    }
+
+    /* 玩家题库 - 绿色 */
+    .creator-btn.players {
+      background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 20px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      font-weight: 700;
+      min-height: 56px;
+    }
+
+    .creator-btn.players:hover {
+      background: linear-gradient(135deg, #42b40a 0%, #63c12d 100%);
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    #game-area {
+      display: none;
+    }
+
+    #question-text {
+      background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      font-size: 24px;
+      font-weight: 800;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 400px;
+      box-sizing: border-box;
+      box-shadow: 0 4px 15px rgba(255, 111, 0, 0.4);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    #result-section {
+      display: none;
+      margin: 20px 0;
+    }
+
+    #feedback-survey {
+      display: none;
+      margin: 20px 0;
+      padding: 15px;
+    }
+
+    .feedback-btn {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 24px;
+      background: transparent;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .feedback-btn:hover {
+      transform: scale(1.2);
+      border-color: #4a64f7;
+    }
+
+    .creator-controls {
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .small-creator-btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      width: auto;
+      height: auto !important;
+      background: rgba(74, 100, 247, 0.2);
+      color: #4a64f7;
+      border: 2px solid #4a64f7;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .small-creator-btn.active {
+      background: #4a64f7;
+      color: white;
+    }
+
+    .small-creator-btn.sean.active {
+      background: #4a90e2;
+      border-color: #4a90e2;
+    }
+
+    .small-creator-btn.charles.active {
+      background: #7b68ee;
+      border-color: #7b68ee;
+    }
+
+    .small-creator-btn.brus.active {
+      background: #ff6b6b;
+      border-color: #ff6b6b;
+    }
+
+    #back-to-menu {
+      color: grey;
+      margin: 20px auto 5px;
+      display: block;
+    }
+
+    #current-creator {
+      font-size: 20px;
+      color: #4a64f7;
+      font-weight: 700;
+      margin: 15px 0;
+    }
+
+    #game-subtitle {
+      font-size: 18px;
+      color: #ff6f00;
+      margin: 10px 0;
+      font-weight: 600;
+    }
+
+    /* Responsive Media Queries */
     @media (max-width: 768px) {
       .nav-container {
         top: 10px;
@@ -266,9 +325,17 @@
         top: 10px;
         right: 10px;
       }
+
+      /* 返回主菜单按钮在移动端的优化 */
+      #back-to-menu {
+        width: auto !important;
+        max-width: 90%;
+        white-space: normal;
+        word-wrap: break-word;
+        text-align: center;
+      }
     }
 
-    /* 手机尺寸 - 汉堡菜单 */
     @media (max-width: 480px) {
       .menu-toggle {
         display: flex;
@@ -314,84 +381,28 @@
         border: 2px solid #4a64f7;
         box-sizing: border-box;
       }
-    }
 
-    .creator-controls {
-      margin: 20px 0;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .small-creator-btn {
-      padding: 8px 16px;
-      font-size: 14px;
-      width: auto;
-      height: auto !important;
-      background: rgba(74, 100, 247, 0.2);
-      color: #4a64f7;
-      border: 2px solid #4a64f7;
-      border-radius: 8px;
-      transition: all 0.3s ease;
-    }
-
-    .small-creator-btn.active {
-      background: #4a64f7;
-      color: white;
-    }
-
-    /* 小按钮也应用出题者颜色 */
-    .small-creator-btn.sean.active {
-      background: #4a90e2;
-      border-color: #4a90e2;
-    }
-
-    .small-creator-btn.charles.active {
-      background: #7b68ee;
-      border-color: #7b68ee;
-    }
-
-    .small-creator-btn.brus.active {
-      background: #ff6b6b;
-      border-color: #ff6b6b;
-    }
-
-    #back-to-menu {
-      margin-top: 20px;
-      background: rgba(150, 150, 150, 0.3);
-      color: #666;
-      border: 2px solid #999;
-    }
-
-    #back-to-menu:hover {
-      background: #999;
-      color: white;
-    }
-
-    #current-creator {
-      font-size: 14px;
-      color: #666;
-      margin: 10px 0;
-    }
-
-    #game-subtitle {
-      font-size: 18px;
-      color: #ff6f00;
-      margin: 10px 0;
-      font-weight: 600;
+      /* 返回主菜单按钮在小屏幕的进一步优化 */
+      #back-to-menu {
+        width: auto !important;
+        max-width: 85%;
+        font-size: 13px;
+        padding: 10px 12px;
+        white-space: normal;
+        line-height: 1.4;
+        text-align: center;
+      }
     }
   </style>
 </head>
 
 <body>
-  <!-- 汉堡菜单按钮 -->
   <button class="menu-toggle" id="menu-toggle" aria-label="Toggle menu">
     <span></span>
     <span></span>
     <span></span>
   </button>
 
-  <!-- 导航按钮 -->
   <div class="nav-container" id="nav-container">
     <a href="index.html" data-i18n="modeSwitch" class="nav-button">🔄 多人模式</a>
     <a href="question-editor.html" data-i18n="questionEditor" class="nav-button">📝 题库编辑</a>
@@ -399,8 +410,6 @@
   </div>
 
   <div class="container">
-
-    <!-- 标题 -->
     <div id="title">
       <svg width="500" height="200" viewBox="0 -10 500 200">
         <path id="arcPath" d="M50,140 A400,400 0 0,1 450,140" fill="none" />
@@ -421,26 +430,17 @@
       </svg>
     </div>
 
-    <h2 style="margin: 10px 0; color: #4a64f7;" data-i18n="mainTitle">一个人也能玩 🎮</h2>
-
-    <!-- 出题者选择 -->
     <div id="creator-selection">
       <h3 data-i18n="selectCreator">选择出题者：</h3>
       <button class="button-9 creator-btn sean" onclick="startGame('Sean')">Sean</button>
       <button class="button-9 creator-btn charles" onclick="startGame('Charles')">Charles</button>
       <button class="button-9 creator-btn brus" onclick="startGame('Brus')">Brus</button>
       <button class="button-9 creator-btn players" onclick="startGame('Players')" data-i18n="playerBank">玩家题库</button>
-      <br>
-      <button class="button-9 creator-btn my-turn" onclick="startCreatorMode()" data-i18n="iWillCreate">✨ 我也来出题</button>
     </div>
 
-    <!-- 游戏区域 -->
     <div id="game-area">
-      <!-- 当前出题者显示 -->
       <div id="current-creator"></div>
-      <div id="game-subtitle">猜猜创作者怎么想 🤔</div>
 
-      <!-- 出题者切换 -->
       <div id="creator-controls" class="creator-controls">
         <button id="creator-Sean" class="button-9 small-creator-btn sean active"
           onclick="changeCreator('Sean')">Sean</button>
@@ -449,46 +449,38 @@
         <button id="creator-Brus" class="button-9 small-creator-btn brus" onclick="changeCreator('Brus')">Brus</button>
       </div>
 
-      <!-- 题目显示 -->
       <div id="question-text">加载中...</div>
 
-      <!-- 频谱显示 -->
       <div class="dimension">
         <span id="left-label">加载中...</span>
         <canvas id="arcCanvas" width="400" height="250"></canvas>
         <span id="right-label">加载中...</span>
       </div>
 
-      <!-- 猜测区域 -->
       <div id="guess-section">
-        <p id="guess-instruction" style="font-size: 16px; margin: 20px 0;" data-i18n="dragSlider">拖动滑条或点击弧线进行猜测</p>
+        <p id="guess-instruction" style="font-size: 16px; margin: 30px auto 25px auto; text-align: center;"
+          data-i18n="dragSlider">拖动滑条进行猜测</p>
         <input type="range" id="guessSlider" min="0" max="100" value="50">
         <br>
-        <button class="button-9" role="button" onclick="submitGuess()" style="margin-top: 15px;"
+        <button class="nav-button" role="button" onclick="submitGuess()" style="margin: 20px auto 25px auto !important;"
           data-i18n="submitAnswer">提交答案</button>
       </div>
 
-      <!-- 结果区域 -->
       <div id="result-section">
         <div id="result-text"></div>
-        <button class="button-9" role="button" onclick="loadNextQuestion()"
-          style="margin-top: 20px; background: linear-gradient(135deg, #ff9966 0%, #ff6f00 100%);"
-          data-i18n="nextQuestion">下一题</button>
+        <button id="nextQuestion" role="button" onclick="loadNextQuestion()" data-i18n="nextQuestion">下一题</button>
       </div>
 
-      <!-- 反馈调查 -->
       <div id="feedback-survey">
         <p style="font-size: 16px; margin-bottom: 10px;" data-i18n="howWasIt">这道题怎么样？</p>
         <button class="feedback-btn" onclick="submitFeedback('up')">👍</button>
         <button class="feedback-btn" onclick="submitFeedback('down')">👎</button>
       </div>
 
-      <!-- 返回按钮 -->
-      <button id="back-to-menu" class="button-9" onclick="backToMenu()" data-i18n="backToMenu">⬅️ 返回主菜单</button>
+      <button id="back-to-menu" class="nav-button" onclick="backToMenu()" data-i18n="backToMenu">⬅️ 返回</button>
     </div>
   </div>
 
-  <!-- 规则说明 -->
   <div style="text-align: center;">
     <div id="rules">
       <h3 id="rules-title" data-i18n="rulesTitle">游戏规则</h3>
@@ -498,10 +490,8 @@
     </div>
   </div>
 
-  <!-- 🎊 庆祝音效 -->
   <audio id="celebrateSound" src="assets/audio/partypop.mp3" preload="auto"></audio>
 
-  <!-- 汉堡菜单脚本 -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const menuToggle = document.getElementById('menu-toggle');
@@ -531,9 +521,7 @@
     });
   </script>
 
-  <!-- 语言配置 -->
   <script src="src/js/lang.js"></script>
-  <!-- 游戏逻辑脚本 -->
   <script src="src/js/singleplayer.js"></script>
 </body>
 
