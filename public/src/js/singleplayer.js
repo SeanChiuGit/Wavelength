@@ -180,7 +180,7 @@ function displayResult(emoji, result, guess) {
 
 	// 简化的结果显示 - 一行显示
 	document.getElementById("result-text").innerHTML = `
-		<h2 style="margin: 10px 0; padding-left:7px; display: flex; align-items: center; justify-content: center; gap: 10px;">
+		<h2 style="margin: 60px auto 38px auto; padding-left:7px; display: flex; align-items: center; justify-content: center; gap: 10px;">
 			<span style="font-size: 1em;">${emoji}</span>
 			<span>${result}</span>
 		</h2>
