@@ -355,37 +355,37 @@ function drawArc(showTarget = false, showGuess = false, guessValue = null) {
 	ctx.stroke();
 
 	// 显示绿色范围区域（但不显示具体数字）
+	// 显示绿色范围区域（根据实际得分区域显示）
 	if (showTarget && currentQuestion) {
-		// 计算范围：使用目标位置 ±15 作为合理范围
-		const rangeStart = Math.max(0, currentQuestion.target_position - 15);
-		const rangeEnd = Math.min(100, currentQuestion.target_position + 15);
-		const zoneSize = Math.floor((rangeEnd - rangeStart) / 3);
+		// 1. Draw "Good" Zone (3 points): Target +/- 15
+		const goodStart = Math.max(0, currentQuestion.target_position - 15);
+		const goodEnd = Math.min(100, currentQuestion.target_position + 15);
 
-		const zones = [
-			{
-				start: rangeStart,
-				end: rangeStart + zoneSize,
-				color: "#6EE7B7", // Light Mint (Emerald 300)
-			},
-			{
-				start: rangeStart + zoneSize,
-				end: rangeEnd - zoneSize,
-				color: "#047857", // Deep Emerald (Emerald 700)
-			},
-			{
-				start: rangeEnd - zoneSize,
-				end: rangeEnd,
-				color: "#6EE7B7",
-			},
-		];
+		if (goodEnd > goodStart) {
+			const startAngle = Math.PI + Math.PI * (goodStart / 100);
+			const endAngle = Math.PI + Math.PI * (goodEnd / 100);
 
-		for (let zone of zones) {
-			const startAngle = Math.PI + Math.PI * (zone.start / 100);
-			const endAngle = Math.PI + Math.PI * (zone.end / 100);
 			ctx.beginPath();
 			ctx.arc(cx, cy, r, startAngle, endAngle);
-			ctx.strokeStyle = zone.color;
-			ctx.lineWidth = 4; // Same thickness as background
+			ctx.strokeStyle = "#6EE7B7"; // Light Mint (Emerald 300)
+			ctx.lineWidth = 4;
+			ctx.lineCap = "butt";
+			ctx.stroke();
+		}
+
+		// 2. Draw "Perfect" Zone (4 points): Target +/- 5
+		// Drawn on top of the Good Zone
+		const perfectStart = Math.max(0, currentQuestion.target_position - 5);
+		const perfectEnd = Math.min(100, currentQuestion.target_position + 5);
+
+		if (perfectEnd > perfectStart) {
+			const startAngle = Math.PI + Math.PI * (perfectStart / 100);
+			const endAngle = Math.PI + Math.PI * (perfectEnd / 100);
+
+			ctx.beginPath();
+			ctx.arc(cx, cy, r, startAngle, endAngle);
+			ctx.strokeStyle = "#047857"; // Deep Emerald (Emerald 700)
+			ctx.lineWidth = 4;
 			ctx.lineCap = "butt";
 			ctx.stroke();
 		}

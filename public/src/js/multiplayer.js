@@ -136,34 +136,37 @@ function drawArc(showTarget = false, showGuess = false) {
 	ctx.stroke();
 
 	if (showTarget) {
-		const zoneSize = Math.floor((targetEnd - targetStart) / 3);
-		const zones = [
-			{
-				start: targetStart,
-				end: targetStart + zoneSize,
-				color: "#6EE7B7", // Light Mint (Emerald 300)
-			},
-			{
-				start: targetStart + zoneSize,
-				end: targetEnd - zoneSize,
-				color: "#047857", // Deep Emerald (Emerald 700)
-			},
-			{
-				start: targetEnd - zoneSize,
-				end: targetEnd,
-				color: "#6EE7B7",
-			},
-		];
+		const center = (targetStart + targetEnd) / 2;
 
-		for (let i = 0; i < zones.length; i++) {
-			const zone = zones[i];
-			const startAngle = Math.PI + Math.PI * (zone.start / 100);
-			const endAngle = Math.PI + Math.PI * (zone.end / 100);
+		// 1. Draw "Good" Zone (3 points): Center +/- 15
+		// Use explicit window from targetStart/End to be safe, but clamp to 0-100
+		const goodStart = Math.max(0, targetStart);
+		const goodEnd = Math.min(100, targetEnd);
+
+		if (goodEnd > goodStart) {
+			const startAngle = Math.PI + Math.PI * (goodStart / 100);
+			const endAngle = Math.PI + Math.PI * (goodEnd / 100);
 
 			ctx.beginPath();
 			ctx.arc(cx, cy, r, startAngle, endAngle);
-			ctx.strokeStyle = zone.color;
-			ctx.lineWidth = 4; // Same thickness as background
+			ctx.strokeStyle = "#6EE7B7"; // Light Mint (Emerald 300)
+			ctx.lineWidth = 4;
+			ctx.lineCap = "butt";
+			ctx.stroke();
+		}
+
+		// 2. Draw "Perfect" Zone (4 points): Center +/- 5
+		const perfectStart = Math.max(0, center - 5);
+		const perfectEnd = Math.min(100, center + 5);
+
+		if (perfectEnd > perfectStart) {
+			const startAngle = Math.PI + Math.PI * (perfectStart / 100);
+			const endAngle = Math.PI + Math.PI * (perfectEnd / 100);
+
+			ctx.beginPath();
+			ctx.arc(cx, cy, r, startAngle, endAngle);
+			ctx.strokeStyle = "#047857"; // Deep Emerald (Emerald 700)
+			ctx.lineWidth = 4;
 			ctx.lineCap = "butt";
 			ctx.stroke();
 		}
@@ -273,7 +276,10 @@ function createRoom() {
 
 function hostStartGame() {
 	topic = hintList[Math.floor(Math.random() * hintList.length)];
-	targetStart = Math.floor(Math.random() * 60);
+	// Allow target to be anywhere from 0 to 100
+	// Window is 30 wide (+/- 15 from center)
+	// So start can range from -15 (center 0) to 85 (center 100)
+	targetStart = Math.floor(Math.random() * 101) - 15;
 	targetEnd = targetStart + 30;
 
 	database.ref("rooms/" + currentRoomId).update({

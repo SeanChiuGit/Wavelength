@@ -385,6 +385,36 @@
             color: #ef4444;
         }
 
+        /* --- Stats Row --- */
+        .stats-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .stat-good {
+            color: #10b981;
+        }
+
+        .stat-bad {
+            color: #ef4444;
+        }
+
+        .stat-neutral {
+            color: #9ca3af;
+        }
+
         /* --- Modal & Visualization --- */
         .modal-overlay {
             position: fixed;
@@ -838,23 +868,40 @@
                     }
                 });
 
+                // Fetch Questions
                 db.ref('question_bank').on('value', (snapshot) => {
                     const val = snapshot.val();
                     if (val) {
                         this.data = val;
                         if (!this.data.creators) this.data.creators = {};
-                        ui.render();
-                        app.filter();
+                        this.checkRender(emptyEl);
                     } else {
                         this.data = { creators: {} };
-                        ui.render();
-                        emptyEl.innerHTML = "<h2>No Questions Found</h2><p>Database is empty.</p>";
-                        emptyEl.style.display = 'block';
+                        this.checkRender(emptyEl);
                     }
                 }, (error) => {
                     console.error("Firebase Error:", error);
                     alert("Error reading database: " + error.message);
                 });
+
+                // Fetch Votes
+                db.ref('question_votes').on('value', (snapshot) => {
+                    this.votes = snapshot.val() || {};
+                    this.checkRender(emptyEl);
+                });
+            },
+
+            checkRender(emptyEl) {
+                if (this.data) {
+                    ui.render();
+                    app.filter();
+                    if (Object.keys(this.data.creators).length === 0) {
+                        emptyEl.innerHTML = "<h2>No Questions Found</h2><p>Database is empty.</p>";
+                        emptyEl.style.display = 'block';
+                    } else {
+                        emptyEl.style.display = 'none';
+                    }
+                }
             },
 
             getAllFlat() {
@@ -866,7 +913,13 @@
                         ? qCollection.map((q, idx) => ({ ...q, _key: idx }))
                         : Object.entries(qCollection).map(([key, q]) => ({ ...q, _key: key }));
 
-                    return qArray.map(q => ({ ...q, _creator: cName }));
+                    return qArray.map(q => {
+                        const qWithVotes = { ...q, _creator: cName };
+                        if (this.votes && q.id && this.votes[q.id]) {
+                            qWithVotes.votes = this.votes[q.id];
+                        }
+                        return qWithVotes;
+                    });
                 });
             },
 
@@ -1023,6 +1076,19 @@
                     const [l_en, r_en] = splitTopic(q.topic_pair.en);
                     const [l_zh, r_zh] = splitTopic(q.topic_pair.zh);
 
+                    // Stats Calculation
+                    const votes = q.votes || { upvotes: 0, downvotes: 0 };
+                    const up = votes.upvotes || 0;
+                    const down = votes.downvotes || 0;
+                    const total = up + down;
+                    const approval = total > 0 ? Math.round((up / total) * 100) : 0;
+
+                    let approvalClass = 'stat-neutral';
+                    if (total > 0) {
+                        if (approval >= 70) approvalClass = 'stat-good';
+                        else if (approval <= 40) approvalClass = 'stat-bad';
+                    }
+
                     const el = document.createElement('div');
                     el.className = 'card';
                     el.innerHTML = `
@@ -1037,6 +1103,13 @@
                             <div class="spectrum-labels"><span>${l_en}</span><span>${r_en}</span></div>
                             <div class="spectrum-labels spectrum-zh"><span>${l_zh}</span><span>${r_zh}</span></div>
                             <div class="spectrum-bar"><div class="spectrum-marker" style="left: ${q.target_position}%"></div></div>
+                        </div>
+                        <div class="stats-row">
+                            <div class="stat-item" title="Upvotes"><span class="stat-good">👍</span> ${up}</div>
+                            <div class="stat-item" title="Downvotes"><span class="stat-bad">👎</span> ${down}</div>
+                            <div class="stat-item ${approvalClass}" style="margin-left: auto;" title="Approval Rating">
+                                ${total > 0 ? approval + '%' : 'No votes'}
+                            </div>
                         </div>
                     `;
                     grid.appendChild(el);

@@ -189,6 +189,7 @@ body {
 	padding: 15px 10px;
 	width: 90%;
 	max-width: 400px;
+	flex-shrink: 0;
 	box-sizing: border-box;
 	background: linear-gradient(
 		135deg,
