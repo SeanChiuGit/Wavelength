@@ -64,6 +64,29 @@ const translations = {
 		guessTime: "猜测时间：",
 		seconds: "秒",
 		loading: "加载中...",
+		roomCreatedWaiting: "房间已创建，等待玩家加入",
+
+		// 多人模式动态文本
+		waitingForPlayers: "等待玩家加入...",
+		roomCreatedWithId: "✅ 房间已创建：{roomId}",
+		playerJoinedStart: "玩家已加入，点击开始游戏！",
+		enterHint: "请输入提示词...",
+		waitingForGuess: "等待对方猜测...  提示词为: {hint}",
+		waitingForHint: "🕐 等待对方输入提示词...",
+		waitingNewRound: "等待开始新一轮...",
+		timeRemaining: "⏳ 剩余时间：{seconds} 秒",
+		roomJoined: "✅ 已加入房间",
+		roomNotExist: "❌ 房间不存在，请检查房间号是否正确",
+		roomFull: "❌ 房间已满，无法加入",
+		connectionFailed: "连接失败：{error}",
+		enterRoomIdAlert: "请输入房间号",
+		enterHintAlert: "请输入提示词！",
+		timeoutHint: "⏰ 时间到！你没能及时出题！系统随机生成了提示词：{hint}",
+		timeoutGuess: "⏰ 时间到！你没能及时猜测！系统随机生成了猜测值：{value}",
+		perfectHit: "💯 完美命中！太神啦！",
+		hitRange: "✅ 猜中了范围！不错！",
+		missedRange: "😢 没猜中！正确范围是 {start} ~ {end}",
+		waitingHint: "（等待提示）",
 	},
 
 	en: {
@@ -74,7 +97,7 @@ const translations = {
 
 		// Creator selection
 		selectCreator: "Select Creator:",
-		playerBank: "Player Bank",
+		playerBank: "Random",
 
 		// Creator descriptions
 		creatorDesc: {
@@ -124,7 +147,7 @@ const translations = {
 			"2. Questioner enters hint, guesser drags slider to guess position.",
 		multiplayerRule3:
 			"3. Try to understand each other's thoughts, challenge your connection! 🔥",
-		createRoom: "🛋️ Create Room",
+		createRoom: "🛋️ New Room",
 		joinRoom: "🔗 Join",
 		enterRoomId: "Enter room code",
 		notConnected: "❌ Not connected",
@@ -134,11 +157,44 @@ const translations = {
 		guessTime: "Guess time:",
 		seconds: "s",
 		loading: "Loading...",
+		roomCreatedWaiting: "Room created, waiting for players to join",
+
+		// Multiplayer dynamic text
+		waitingForPlayers: "Waiting for players...",
+		roomCreatedWithId: "✅ Room created: {roomId}",
+		playerJoinedStart: "Player joined, click to start!",
+		enterHint: "Enter your hint...",
+		waitingForGuess: "Waiting for guess... Hint: {hint}",
+		waitingForHint: "🕐 Waiting for hint...",
+		waitingNewRound: "Waiting for new round...",
+		timeRemaining: "⏳ Time left: {seconds}s",
+		roomJoined: "✅ Joined room",
+		roomNotExist: "❌ Room does not exist",
+		roomFull: "❌ Room is full",
+		connectionFailed: "Connection failed: {error}",
+		enterRoomIdAlert: "Please enter room code",
+		enterHintAlert: "Please enter a hint!",
+		timeoutHint: "⏰ Time's up! Random hint generated: {hint}",
+		timeoutGuess: "⏰ Time's up! Random guess generated: {value}",
+		perfectHit: "💯 Perfect hit! Amazing!",
+		hitRange: "✅ Within range! Nice!",
+		missedRange: "😢 Missed! Correct range: {start} ~ {end}",
+		waitingHint: "(Waiting for hint)",
 	},
 };
 
 // 当前语言
 let currentLang = "zh";
+
+// 语言切换回调函数列表
+const langChangeCallbacks = [];
+
+// 注册语言切换回调
+function onLangChange(callback) {
+	if (typeof callback === "function") {
+		langChangeCallbacks.push(callback);
+	}
+}
 
 // 获取翻译文本
 function t(key, replacements = {}) {
@@ -157,6 +213,20 @@ function t(key, replacements = {}) {
 	}
 
 	return result;
+}
+
+// 设置动态文本（支持语言切换时自动更新）
+function setDynamicText(elementId, key, replacements = {}) {
+	const el = document.getElementById(elementId);
+	if (el) {
+		el.textContent = t(key, replacements);
+		el.setAttribute("data-i18n-dynamic", key);
+		if (Object.keys(replacements).length > 0) {
+			el.setAttribute("data-i18n-params", JSON.stringify(replacements));
+		} else {
+			el.removeAttribute("data-i18n-params");
+		}
+	}
 }
 
 // 切换语言
@@ -180,11 +250,28 @@ function updateAllText() {
 		el.placeholder = t(key);
 	});
 
+	// 更新所有动态设置的文本
+	document.querySelectorAll("[data-i18n-dynamic]").forEach((el) => {
+		const key = el.getAttribute("data-i18n-dynamic");
+		const paramsStr = el.getAttribute("data-i18n-params");
+		const params = paramsStr ? JSON.parse(paramsStr) : {};
+		el.textContent = t(key, params);
+	});
+
 	// 更新语言切换按钮
 	const langButton = document.getElementById("lang-switch");
 	if (langButton) {
 		langButton.textContent = currentLang === "zh" ? "🇬🇧 EN" : "🇨🇳 中文";
 	}
+
+	// 执行所有注册的回调函数
+	langChangeCallbacks.forEach((callback) => {
+		try {
+			callback(currentLang);
+		} catch (e) {
+			console.error("Language change callback error:", e);
+		}
+	});
 }
 
 // 页面加载时初始化语言

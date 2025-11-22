@@ -465,8 +465,18 @@ function loadNextQuestion() {
 async function loadNormalQuestion() {
 	if (!questionBank) return;
 
-	const questions = questionBank.creators[currentCreator].questions;
-	if (!questions || questions.length === 0) {
+	const questionsData = questionBank.creators[currentCreator]?.questions;
+	if (!questionsData) {
+		alert("该出题者没有题目！");
+		return;
+	}
+
+	// 将对象或数组转换为数组格式
+	const questions = Array.isArray(questionsData)
+		? questionsData
+		: Object.values(questionsData);
+
+	if (questions.length === 0) {
 		alert("该出题者没有题目！");
 		return;
 	}
@@ -508,4 +518,38 @@ async function loadNormalQuestion() {
 window.addEventListener("DOMContentLoaded", () => {
 	loadQuestionBank();
 	drawArc(false, false);
+
+	// 注册语言切换回调，更新当前题目显示
+	onLangChange(() => {
+		if (currentQuestion) {
+			updateCurrentQuestionDisplay();
+		}
+	});
 });
+
+// 更新当前题目的显示（语言切换时调用）
+async function updateCurrentQuestionDisplay() {
+	// 更新题目文本
+	const topicPairText = getLocalizedText(currentQuestion.topic_pair);
+	const topicParts = topicPairText.split(" ↔ ");
+	document.getElementById("left-label").innerText = topicParts[0];
+	document.getElementById("right-label").innerText = topicParts[1];
+
+	// 更新问题文本和评价统计
+	const questionText = getLocalizedText(currentQuestion.question_text);
+	const voteStats = await displayQuestionVotes(currentQuestion.id);
+	document.getElementById("question-text").innerHTML = questionText + voteStats;
+
+	// 更新出题者标签
+	if (currentCreator === "Players") {
+		document.getElementById("current-creator").innerHTML = `${t(
+			"creatorLabel"
+		)}<strong style="color: #333;">${
+			currentQuestion.question_creator
+		}</strong>`;
+	} else {
+		document.getElementById("current-creator").innerText = `${t(
+			"creatorLabel"
+		)}${currentCreator}`;
+	}
+}

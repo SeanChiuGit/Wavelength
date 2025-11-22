@@ -190,10 +190,9 @@ function createRoom() {
 			guessTime: guessTimeLimit,
 		},
 	});
-	document.getElementById("connection-status").textContent =
-		"✅ 房间已创建：" + currentRoomId;
+	setDynamicText("connection-status", "roomCreatedWithId", { roomId: currentRoomId });
 	startListening();
-	document.getElementById("game-step").innerText = "等待玩家加入...";
+	setDynamicText("game-step", "waitingForPlayers");
 
 	// ⏰ 显示时间设置面板（只有房主可见）
 	document.getElementById("time-settings").style.display = "block";
@@ -236,7 +235,7 @@ function hostStartGame() {
 	if (hintInput) hintInput.style.display = "block";
 	drawArc(true);
 	if (startGameBtn) startGameBtn.style.display = "none";
-	if (gameStep) gameStep.innerText = "请输入提示词...";
+	if (gameStep) setDynamicText("game-step", "enterHint");
 
 	// ⏰ 游戏开始后隐藏时间设置面板
 	if (timeSettings) timeSettings.style.display = "none";
@@ -252,7 +251,7 @@ function confirmHint(countdown = false) {
 		document.getElementById("hintBox").value = word;
 	}
 	const hint = document.getElementById("hintBox").value.trim();
-	if (!hint) return alert("请输入提示词！");
+	if (!hint) return alert(t("enterHintAlert"));
 	database.ref("rooms/" + currentRoomId).update({
 		currentHint: hint,
 		gameState: "guessPhase",
@@ -260,10 +259,9 @@ function confirmHint(countdown = false) {
 		phaseStartTime: Date.now(),
 	});
 	document.getElementById("hint-input").style.display = "none";
-	document.getElementById("game-step").innerText =
-		"等待对方猜测...  提示词为: " + hint;
+	setDynamicText("game-step", "waitingForGuess", { hint });
 	if (countdown) {
-		alert("⏰ 时间到！你没能及时出题！系统随机生成了提示词：" + hint);
+		alert(t("timeoutHint", { hint }));
 	}
 }
 
@@ -272,7 +270,7 @@ function confirmHint(countdown = false) {
 // -------------------------
 function joinRoom() {
 	currentRoomId = document.getElementById("roomId").value.trim();
-	if (!currentRoomId) return alert("请输入房间号");
+	if (!currentRoomId) return alert(t("enterRoomIdAlert"));
 
 	// 🔍 检查房间是否存在并且有效
 	database
@@ -283,14 +281,14 @@ function joinRoom() {
 
 			// 检查房间是否存在且有房主
 			if (!snapshot.exists() || !roomData || !roomData.host) {
-				alert("❌ 房间不存在，请检查房间号是否正确");
+				alert(t("roomNotExist"));
 				currentRoomId = null;
 				return;
 			}
 
 			// 检查房间是否已经有客人了
 			if (roomData.guest) {
-				alert("❌ 房间已满，无法加入");
+				alert(t("roomFull"));
 				currentRoomId = null;
 				return;
 			}
@@ -298,12 +296,11 @@ function joinRoom() {
 			// 房间存在且有效，继续加入
 			playerRole = "guest";
 			database.ref("rooms/" + currentRoomId).update({ guest: true });
-			document.getElementById("connection-status").textContent =
-				"✅ 已加入房间";
+			setDynamicText("connection-status", "roomJoined");
 			startListening();
 		})
 		.catch((error) => {
-			alert("连接失败：" + error.message);
+			alert(t("connectionFailed", { error: error.message }));
 			currentRoomId = null;
 		});
 }
@@ -326,7 +323,7 @@ function submitGuess(countdown = false) {
 
 	let result = "";
 	if (guess >= perfectStart && guess <= perfectEnd) {
-		result = "💯 完美命中！太神啦！";
+		result = t("perfectHit");
 
 		// 🎉 视觉礼炮特效
 		confetti({
@@ -340,9 +337,9 @@ function submitGuess(countdown = false) {
 		celebrateSound.currentTime = 0;
 		celebrateSound.play();
 	} else if (guess >= targetStart && guess <= targetEnd) {
-		result = "✅ 猜中了范围！不错！";
+		result = t("hitRange");
 	} else {
-		result = `😢 没猜中！正确范围是 ${targetStart} ~ ${targetEnd}`;
+		result = t("missedRange", { start: targetStart, end: targetEnd });
 	}
 
 	document.getElementById("guess-section").style.display = "none";
@@ -363,10 +360,7 @@ function submitGuess(countdown = false) {
 	});
 
 	if (countdown) {
-		alert(
-			"⏰ 时间到！你没能及时猜测！系统随机生成了猜测值：" +
-				document.getElementById("guessSlider").value
-		);
+		alert(t("timeoutGuess", { value: document.getElementById("guessSlider").value }));
 	}
 }
 
@@ -396,7 +390,7 @@ function nextRound() {
 function resetUI() {
 	// 清除提示词和结果
 	document.getElementById("hintBox").value = "";
-	document.getElementById("hint").innerText = "（等待提示）";
+	document.getElementById("hint").innerText = t("waitingHint");
 	document.getElementById("result").innerText = "";
 
 	// 隐藏输入/猜测区域
@@ -407,7 +401,7 @@ function resetUI() {
 	document.getElementById("nextRoundBtn").style.display = "none";
 
 	// 重置进度提示
-	document.getElementById("game-step").innerText = "等待开始新一轮...";
+	setDynamicText("game-step", "waitingNewRound");
 
 	// 清除红点
 	guessPercent = null;
@@ -428,7 +422,7 @@ function startCountdown(startTime, durationInSeconds) {
 		const now = Date.now();
 		const secondsPassed = Math.floor((now - startTime) / 1000);
 		const secondsLeft = Math.max(0, durationInSeconds - secondsPassed);
-		countdownEl.textContent = `⏳ 剩余时间：${secondsLeft} 秒`;
+		countdownEl.textContent = t("timeRemaining", { seconds: secondsLeft });
 
 		if (secondsLeft <= 0) {
 			clearInterval(countdownInterval);
@@ -467,9 +461,8 @@ function startListening() {
 		}
 
 		if (!data.target && data.guest && playerRole === "host") {
-			const gameStep = document.getElementById("game-step");
 			const startGameBtn = document.getElementById("startGameBtn");
-			if (gameStep) gameStep.innerText = "玩家已加入，点击开始游戏！";
+			setDynamicText("game-step", "playerJoinedStart");
 			if (startGameBtn) startGameBtn.style.display = "block";
 		}
 
@@ -536,8 +529,7 @@ function startListening() {
 			}
 			if (currentTurn !== playerRole && data.target) {
 				resetUI();
-				const gameStep = document.getElementById("game-step");
-				if (gameStep) gameStep.innerText = "🕐 等待对方输入提示词...";
+				setDynamicText("game-step", "waitingForHint");
 			}
 		}
 	});

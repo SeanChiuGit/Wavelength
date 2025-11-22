@@ -185,6 +185,31 @@
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
+        #auth-pass {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        #auth-pass:hover {
+            border-color: #d1d5db;
+        }
+
+        #auth-pass:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+            outline: none;
+        }
+
+        #auth-pass::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+
         .glass-select {
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
@@ -599,7 +624,7 @@
                 placeholder="Password">
 
             <button class="btn btn-primary" onclick="checkAuth()" style="width: 100%; justify-content: center;">
-                Unlock Editor
+                Let Me In.
             </button>
         </div>
     </div>
