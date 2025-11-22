@@ -24,6 +24,8 @@ let currentQuestion = null;
 let currentCreator = "Sean";
 let sessionId = generateSessionId();
 let startTime = null;
+let seenQuestionIds = new Set(); // Track seen questions to avoid repeats
+let feedbackTimeout = null; // Track feedback timeout to prevent race conditions
 
 // -------------------------
 // 🎯 游戏核心函数
@@ -47,11 +49,15 @@ async function loadQuestionBank() {
 
 		if (data && data.creators) {
 			questionBank = data;
-			console.log(
-				"✅ Loaded from Cloud (Firebase):",
-				questionBank.total_questions,
-				"questions"
-			);
+			// Calculate actual question count dynamically
+			let actualCount = 0;
+			for (const creatorName in questionBank.creators) {
+				const creator = questionBank.creators[creatorName];
+				if (creator.questions) {
+					actualCount += Object.keys(creator.questions).length;
+				}
+			}
+			console.log("✅ Loaded from Cloud (Firebase):", actualCount, "questions");
 			return; // Success! Exit function.
 		} else {
 			console.warn(
@@ -67,11 +73,15 @@ async function loadQuestionBank() {
 		console.log("📂 Loading local JSON file...");
 		const response = await fetch("data/question_bank.json"); // Ensure path is correct relative to HTML
 		questionBank = await response.json();
-		console.log(
-			"✅ Loaded from Local File:",
-			questionBank.total_questions,
-			"questions"
-		);
+		// Calculate actual question count dynamically
+		let actualCount = 0;
+		for (const creatorName in questionBank.creators) {
+			const creator = questionBank.creators[creatorName];
+			if (creator.questions) {
+				actualCount += Object.keys(creator.questions).length;
+			}
+		}
+		console.log("✅ Loaded from Local File:", actualCount, "questions");
 	} catch (error) {
 		console.error(
 			"❌ Critical Error: Could not load questions from Cloud OR Local file.",
@@ -85,6 +95,14 @@ async function loadQuestionBank() {
 function getLocalizedText(textObj) {
 	if (typeof textObj === "string") return textObj;
 	return textObj[currentLang] || textObj["zh"] || textObj["en"] || "";
+}
+
+// 格式化出题者名字（为Sean添加超链接）
+function formatCreatorName(creator) {
+	if (creator === "Sean") {
+		return `<a href="https://seanchiugit.github.io/" target="_blank" class="sean-link" style="color: inherit; text-decoration: none;">${creator}</a>`;
+	}
+	return creator;
 }
 
 // 开始游戏
@@ -105,9 +123,11 @@ async function startGame(creator = "Sean") {
 	if (creator === "Players") {
 		loadPlayerQuestions();
 	} else {
-		document.getElementById("current-creator").innerText = `${t(
+		document.getElementById(
+			"current-creator"
+		).innerHTML = `<span class="creator-content">${t(
 			"creatorLabel"
-		)}${creator}`;
+		)}${formatCreatorName(creator)}</span>`;
 
 		loadNormalQuestion();
 	}
@@ -115,9 +135,11 @@ async function startGame(creator = "Sean") {
 
 // 加载玩家题库
 async function loadPlayerQuestions() {
-	document.getElementById("current-creator").innerText = `${t(
-		"creatorLabel"
-	)}${t("playerBank")}`;
+	document.getElementById(
+		"current-creator"
+	).innerHTML = `<span class="creator-content">${t("creatorLabel")}${t(
+		"playerBank"
+	)}</span>`;
 	document.getElementById("creator-controls").style.display = "none";
 
 	try {
@@ -133,9 +155,29 @@ async function loadPlayerQuestions() {
 		// 转换为数组
 		const playerQuestions = Object.values(data);
 
-		// 随机选择一道题
+		// 随机选择一道题 (Non-repeating logic)
+		let availableQuestions = playerQuestions.filter(
+			(q) => !seenQuestionIds.has(q.id)
+		);
+
+		if (availableQuestions.length === 0) {
+			// If all questions seen, reset the history for this category
+			// Or we could just reset globally, but per-category makes sense if we switch back and forth?
+			// Actually, let's just reset for now to allow infinite play, but maybe notify?
+			// User just said "ensure no repeats", usually implies "until all done".
+			// Let's reset and pick from full list.
+			seenQuestionIds.clear(); // Simple approach: clear all history if we run out in one category?
+			// Better: just clear for this specific pool? But ids are unique globally usually?
+			// Let's just filter from playerQuestions again.
+			availableQuestions = playerQuestions;
+			// Note: if we want to be strict, we should only clear ids belonging to this set, but clearing all is safer to avoid stuck state.
+			// However, to be nicer, let's just re-use the full list.
+		}
+
 		currentQuestion =
-			playerQuestions[Math.floor(Math.random() * playerQuestions.length)];
+			availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+		seenQuestionIds.add(currentQuestion.id);
+
 		startTime = Date.now();
 
 		// 更新UI - 使用多语言文本
@@ -151,15 +193,20 @@ async function loadPlayerQuestions() {
 			questionText + voteStats;
 
 		// 显示玩家出题者名字（普通黑色加粗）
-		document.getElementById("current-creator").innerHTML = `${t(
+		document.getElementById(
+			"current-creator"
+		).innerHTML = `<span class="creator-content">${t(
 			"creatorLabel"
 		)}<strong style="color: #333;">${
 			currentQuestion.question_creator
-		}</strong>`;
+		}</strong></span>`;
 
 		document.getElementById("guessSlider").value = 50;
 		document.getElementById("result-section").style.display = "none";
 		document.getElementById("guess-section").style.display = "block";
+
+		// Reset Feedback UI
+		resetFeedbackUI();
 		document.getElementById("feedback-survey").style.display = "none";
 
 		drawArc(false, false);
@@ -222,14 +269,30 @@ function submitFeedback(rating) {
 			"thanksUp"
 		)}</p>`;
 	} else {
-		feedbackDiv.innerHTML = `<p style="color: #ff6f00; font-size: 16px;">${t(
+		feedbackDiv.innerHTML = `<p style="color: #ff6f00; font-family: 'Noto Sans SC'; font-weight:bold; font-size: 16px;">${t(
 			"thanksDown"
 		)}</p>`;
 	}
 
-	setTimeout(() => {
+	feedbackTimeout = setTimeout(() => {
 		feedbackDiv.style.display = "none";
 	}, 1500);
+}
+
+// 重置反馈UI
+function resetFeedbackUI() {
+	if (feedbackTimeout) {
+		clearTimeout(feedbackTimeout);
+		feedbackTimeout = null;
+	}
+	const feedbackDiv = document.getElementById("feedback-survey");
+	feedbackDiv.innerHTML = `
+        <p style="font-size: 14px; color: #888; margin-bottom: 12px; padding-left:8px; font-family: 'Noto Sans SC', sans-serif; letter-spacing: 1px;" data-i18n="howWasIt">${
+					t("howWasIt") || "这道题怎么样？"
+				}</p>
+        <button class="feedback-btn" onclick="submitFeedback('up')">👍</button>
+        <button class="feedback-btn" onclick="submitFeedback('down')">👎</button>
+    `;
 }
 
 // 保存游戏数据到Firebase（简化版）
@@ -280,14 +343,15 @@ const ctx = arcCanvas.getContext("2d");
 function drawArc(showTarget = false, showGuess = false, guessValue = null) {
 	ctx.clearRect(0, 0, arcCanvas.width, arcCanvas.height);
 	const cx = arcCanvas.width / 2,
-		cy = arcCanvas.height - 20,
-		r = 180;
+		cy = arcCanvas.height - 40,
+		r = 162; // 90% of 180
 
-	// 绘制基础弧线
+	// 绘制基础弧线 (Ultra-Minimal)
 	ctx.beginPath();
 	ctx.arc(cx, cy, r, Math.PI, 0);
-	ctx.strokeStyle = "#333";
-	ctx.lineWidth = 3;
+	ctx.strokeStyle = "#E5E5E5"; // Light neutral grey
+	ctx.lineWidth = 4; // Thin stroke
+	ctx.lineCap = "round";
 	ctx.stroke();
 
 	// 显示绿色范围区域（但不显示具体数字）
@@ -301,17 +365,17 @@ function drawArc(showTarget = false, showGuess = false, guessValue = null) {
 			{
 				start: rangeStart,
 				end: rangeStart + zoneSize,
-				color: "rgba(144,238,144,0.6)",
+				color: "#6EE7B7", // Light Mint (Emerald 300)
 			},
 			{
 				start: rangeStart + zoneSize,
 				end: rangeEnd - zoneSize,
-				color: "rgba(34,139,34,0.7)",
+				color: "#047857", // Deep Emerald (Emerald 700)
 			},
 			{
 				start: rangeEnd - zoneSize,
 				end: rangeEnd,
-				color: "rgba(144,238,144,0.6)",
+				color: "#6EE7B7",
 			},
 		];
 
@@ -321,11 +385,16 @@ function drawArc(showTarget = false, showGuess = false, guessValue = null) {
 			ctx.beginPath();
 			ctx.arc(cx, cy, r, startAngle, endAngle);
 			ctx.strokeStyle = zone.color;
-			ctx.lineWidth = 20;
+			ctx.lineWidth = 4; // Same thickness as background
+			ctx.lineCap = "butt";
 			ctx.stroke();
 		}
 
-		// 显示目标位置（金色星星）
+		// 显示目标位置（金色星星）- Keeping this for singleplayer as it's a nice touch, or should I remove it to be consistent?
+		// The user asked to "replace with such arc", implying consistency.
+		// However, singleplayer usually shows the exact target after guessing.
+		// Let's keep the star but maybe make it fit the minimal style better?
+		// For now, I will keep the star logic but ensure it aligns with the new radius/position.
 		const targetAngle =
 			Math.PI + Math.PI * (currentQuestion.target_position / 100);
 		const targetX = cx + r * Math.cos(targetAngle);
@@ -333,9 +402,9 @@ function drawArc(showTarget = false, showGuess = false, guessValue = null) {
 
 		ctx.beginPath();
 		ctx.arc(targetX, targetY, 8, 0, 2 * Math.PI);
-		ctx.fillStyle = "gold";
+		ctx.fillStyle = "#047857"; // Deep emerald green to match target zone center
 		ctx.fill();
-		ctx.strokeStyle = "orange";
+		ctx.strokeStyle = "white"; // White border to match minimal style
 		ctx.lineWidth = 2;
 		ctx.stroke();
 	}
@@ -345,10 +414,59 @@ function drawArc(showTarget = false, showGuess = false, guessValue = null) {
 		const angle = Math.PI + Math.PI * (guessValue / 100);
 		const x = cx + r * Math.cos(angle);
 		const y = cy + r * Math.sin(angle);
+
+		// Connector Line
 		ctx.beginPath();
-		ctx.arc(x, y, 6, 0, 2 * Math.PI);
-		ctx.fillStyle = "red";
+		ctx.moveTo(cx, cy);
+		ctx.lineTo(x, y);
+		ctx.strokeStyle = "rgba(0, 0, 0, 0.05)";
+		ctx.lineWidth = 1;
+		ctx.stroke();
+
+		// Minimal Dot
+		const dotRadius = 8;
+
+		// Calculate color based on slider track gradient
+		// Same gradient as slider: #5a7ae7 -> #9b88ff -> #ffcc70 -> #ff9966 -> #ff7a7e
+		const percent = guessValue / 100;
+		let red, green, blue;
+
+		if (percent <= 0.25) {
+			// Interpolate between #5a7ae7 (90, 122, 231) and #9b88ff (155, 136, 255)
+			const t = percent / 0.25;
+			red = Math.round(90 + (155 - 90) * t);
+			green = Math.round(122 + (136 - 122) * t);
+			blue = Math.round(231 + (255 - 231) * t);
+		} else if (percent <= 0.5) {
+			// Interpolate between #9b88ff (155, 136, 255) and #ffcc70 (255, 204, 112)
+			const t = (percent - 0.25) / 0.25;
+			red = Math.round(155 + (255 - 155) * t);
+			green = Math.round(136 + (204 - 136) * t);
+			blue = Math.round(255 + (112 - 255) * t);
+		} else if (percent <= 0.75) {
+			// Interpolate between #ffcc70 (255, 204, 112) and #ff9966 (255, 153, 102)
+			const t = (percent - 0.5) / 0.25;
+			red = Math.round(255 + (255 - 255) * t);
+			green = Math.round(204 + (153 - 204) * t);
+			blue = Math.round(112 + (102 - 112) * t);
+		} else {
+			// Interpolate between #ff9966 (255, 153, 102) and #ff7a7e (255, 122, 126)
+			const t = (percent - 0.75) / 0.25;
+			red = Math.round(255 + (255 - 255) * t);
+			green = Math.round(153 + (122 - 153) * t);
+			blue = Math.round(102 + (126 - 102) * t);
+		}
+
+		const dotColor = `rgb(${red}, ${green}, ${blue})`;
+
+		ctx.beginPath();
+		ctx.arc(x, y, dotRadius, 0, 2 * Math.PI);
+		ctx.fillStyle = dotColor;
 		ctx.fill();
+
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = "white";
+		ctx.stroke();
 	}
 }
 
@@ -481,8 +599,25 @@ async function loadNormalQuestion() {
 		return;
 	}
 
-	// 随机选择一道题
-	currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+	// 随机选择一道题 (Non-repeating logic)
+	let availableQuestions = questions.filter((q) => !seenQuestionIds.has(q.id));
+
+	if (availableQuestions.length === 0) {
+		// Reset if all questions in this category have been played
+		availableQuestions = questions;
+		// Optional: clear seenQuestionIds? Or just let it pick from full list again?
+		// If we don't clear, it will always be empty next time.
+		// Let's just pick from full list but NOT clear the global set,
+		// so we don't accidentally re-enable questions from other creators if we switch?
+		// Actually, if we pick from full list, we should probably just allow repeats now.
+		// But to avoid immediate repeat of just-played, maybe we should clear?
+		// Simplest: Just use full list.
+	}
+
+	currentQuestion =
+		availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+	seenQuestionIds.add(currentQuestion.id);
+
 	startTime = Date.now();
 
 	// 更新UI - 使用多语言文本
@@ -499,13 +634,18 @@ async function loadNormalQuestion() {
 	document.getElementById("guessSlider").value = 50;
 
 	// 显示当前出题者
-	document.getElementById("current-creator").innerText = `${t(
+	document.getElementById(
+		"current-creator"
+	).innerHTML = `<span class="creator-content">${t(
 		"creatorLabel"
-	)}${currentCreator}`;
+	)}${formatCreatorName(currentCreator)}</span>`;
 
 	// 隐藏结果区域
 	document.getElementById("result-section").style.display = "none";
 	document.getElementById("guess-section").style.display = "block";
+
+	// Reset Feedback UI
+	resetFeedbackUI();
 	document.getElementById("feedback-survey").style.display = "none";
 
 	// 重绘画布
@@ -548,8 +688,10 @@ async function updateCurrentQuestionDisplay() {
 			currentQuestion.question_creator
 		}</strong>`;
 	} else {
-		document.getElementById("current-creator").innerText = `${t(
+		document.getElementById(
+			"current-creator"
+		).innerHTML = `<span class="creator-content">${t(
 			"creatorLabel"
-		)}${currentCreator}`;
+		)}${formatCreatorName(currentCreator)}</span>`;
 	}
 }

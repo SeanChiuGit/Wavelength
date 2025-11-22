@@ -1,7 +1,7 @@
 /* 引入本地 Zaio 字体 */
 @font-face {
 	font-family: "Zaio";
-	src: url("fonts/Zaio.otf") format("opentype");
+	src: url("../../assets/fonts/Zaio.otf") format("opentype");
 	font-weight: normal;
 	font-style: normal;
 }

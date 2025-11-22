@@ -1,25 +1,25 @@
 {
-  "name": "wavelength-game",
-  "version": "1.0.0",
-  "description": "A Chinese-language web-based party game inspired by Wavelength board game",
-  "main": "public/index.html",
-  "scripts": {
-    "start": "npx http-server public -p 8080 -o",
-    "dev": "npx http-server . -p 8080 -o"
-  },
-  "keywords": [
-    "game",
-    "party-game",
-    "wavelength",
-    "multiplayer",
-    "chinese"
-  ],
-  "author": "",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "dependencies": {},
-  "devDependencies": {}
+	"name": "wavelength-game",
+	"version": "2.0.0",
+	"description": "A Chinese/English web-based party game inspired by Wavelength board game",
+	"main": "public/index.html",
+	"scripts": {
+		"start": "npx http-server public -p 8080 -o",
+		"dev": "npx http-server . -p 8080 -o"
+	},
+	"keywords": [
+		"game",
+		"party-game",
+		"wavelength",
+		"multiplayer",
+		"chinese"
+	],
+	"author": "",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": ""
+	},
+	"dependencies": {},
+	"devDependencies": {}
 }

@@ -109,10 +109,10 @@ const translations = {
 		// Game interface
 		guessWhat: "Guess What the Creator Thinks",
 		creatorLabel: "Creator: ",
-		dragSlider: "Drag the slider or click the arc to guess",
+		dragSlider: "Drag the slider to guess",
 		submitAnswer: "Submit Answer",
 		nextQuestion: "Next",
-		backToMenu: "⬅️ Back to Menu",
+		backToMenu: "⬅️ Return",
 
 		// Result feedback
 		perfect: "Perfect Hit!",
@@ -121,7 +121,7 @@ const translations = {
 		tooFar: "A Bit Far",
 
 		// Feedback survey
-		howWasIt: "How was this question?",
+		howWasIt: "Do you like this question?",
 		thanksUp: "👍 Thanks!",
 		thanksDown: "👎 Recorded",
 		positive: "positive",
@@ -226,6 +226,16 @@ function setDynamicText(elementId, key, replacements = {}) {
 		} else {
 			el.removeAttribute("data-i18n-params");
 		}
+	}
+}
+
+// 清除动态文本（同时移除 i18n 属性）
+function clearDynamicText(elementId) {
+	const el = document.getElementById(elementId);
+	if (el) {
+		el.textContent = "";
+		el.removeAttribute("data-i18n-dynamic");
+		el.removeAttribute("data-i18n-params");
 	}
 }
 

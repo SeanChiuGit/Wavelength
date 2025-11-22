@@ -57,7 +57,7 @@ window.addEventListener("DOMContentLoaded", () => {
 // 加载词库函数
 async function loadWordBank() {
 	try {
-		const response = await fetch("../data/wordbank.json");
+		const response = await fetch("data/wordbank.json");
 		const data = await response.json();
 		chineseWordBank = data.words;
 		console.log("✅ 词库加载成功:", chineseWordBank.length, "个词");
@@ -71,7 +71,7 @@ async function loadWordBank() {
 // 加载提示列表函数
 async function loadHintList() {
 	try {
-		const response = await fetch("../data/hintlist.json");
+		const response = await fetch("data/hintlist.json");
 		const data = await response.json();
 		hintList = data.hints;
 		console.log("✅ 提示列表加载成功:", hintList.length, "对提示");
@@ -124,13 +124,15 @@ const ctx = arcCanvas.getContext("2d");
 function drawArc(showTarget = false, showGuess = false) {
 	ctx.clearRect(0, 0, arcCanvas.width, arcCanvas.height);
 	const cx = arcCanvas.width / 2,
-		cy = arcCanvas.height - 20,
-		r = 180;
+		cy = arcCanvas.height - 40,
+		r = 162; // 90% of 180
 
+	// 1. Draw Background Arc (Ultra-Minimal)
 	ctx.beginPath();
 	ctx.arc(cx, cy, r, Math.PI, 0);
-	ctx.strokeStyle = "#333";
-	ctx.lineWidth = 3;
+	ctx.strokeStyle = "#E5E5E5"; // Light neutral grey
+	ctx.lineWidth = 4; // Thin stroke
+	ctx.lineCap = "round";
 	ctx.stroke();
 
 	if (showTarget) {
@@ -139,26 +141,30 @@ function drawArc(showTarget = false, showGuess = false) {
 			{
 				start: targetStart,
 				end: targetStart + zoneSize,
-				color: "rgba(144,238,144,0.6)",
+				color: "#6EE7B7", // Light Mint (Emerald 300)
 			},
 			{
 				start: targetStart + zoneSize,
 				end: targetEnd - zoneSize,
-				color: "rgba(34,139,34,0.7)",
+				color: "#047857", // Deep Emerald (Emerald 700)
 			},
 			{
 				start: targetEnd - zoneSize,
 				end: targetEnd,
-				color: "rgba(144,238,144,0.6)",
+				color: "#6EE7B7",
 			},
 		];
-		for (let zone of zones) {
+
+		for (let i = 0; i < zones.length; i++) {
+			const zone = zones[i];
 			const startAngle = Math.PI + Math.PI * (zone.start / 100);
 			const endAngle = Math.PI + Math.PI * (zone.end / 100);
+
 			ctx.beginPath();
 			ctx.arc(cx, cy, r, startAngle, endAngle);
 			ctx.strokeStyle = zone.color;
-			ctx.lineWidth = 20;
+			ctx.lineWidth = 4; // Same thickness as background
+			ctx.lineCap = "butt";
 			ctx.stroke();
 		}
 	}
@@ -169,10 +175,67 @@ function drawArc(showTarget = false, showGuess = false) {
 		const angle = Math.PI + Math.PI * (percent / 100);
 		const x = cx + r * Math.cos(angle);
 		const y = cy + r * Math.sin(angle);
+
+		// Draw Connector Line (Very subtle)
 		ctx.beginPath();
-		ctx.arc(x, y, 6, 0, 2 * Math.PI);
-		ctx.fillStyle = "red";
+		ctx.moveTo(cx, cy);
+		ctx.lineTo(x, y);
+		ctx.strokeStyle = "rgba(0, 0, 0, 0.05)";
+		ctx.lineWidth = 1;
+		ctx.stroke();
+
+		// Draw Minimal Dot
+		const dotRadius = 8; // Small and simple
+
+		// Calculate color based on slider track gradient
+		// Same gradient as slider: #5a7ae7 -> #9b88ff -> #ffcc70 -> #ff9966 -> #ff7a7e
+		const percentPos = percent / 100;
+		let red, green, blue;
+
+		if (percentPos <= 0.25) {
+			// Interpolate between #5a7ae7 (90, 122, 231) and #9b88ff (155, 136, 255)
+			const t = percentPos / 0.25;
+			red = Math.round(90 + (155 - 90) * t);
+			green = Math.round(122 + (136 - 122) * t);
+			blue = Math.round(231 + (255 - 231) * t);
+		} else if (percentPos <= 0.5) {
+			// Interpolate between #9b88ff (155, 136, 255) and #ffcc70 (255, 204, 112)
+			const t = (percentPos - 0.25) / 0.25;
+			red = Math.round(155 + (255 - 155) * t);
+			green = Math.round(136 + (204 - 136) * t);
+			blue = Math.round(255 + (112 - 255) * t);
+		} else if (percentPos <= 0.75) {
+			// Interpolate between #ffcc70 (255, 204, 112) and #ff9966 (255, 153, 102)
+			const t = (percentPos - 0.5) / 0.25;
+			red = Math.round(255 + (255 - 255) * t);
+			green = Math.round(204 + (153 - 204) * t);
+			blue = Math.round(112 + (102 - 112) * t);
+		} else {
+			// Interpolate between #ff9966 (255, 153, 102) and #ff7a7e (255, 122, 126)
+			const t = (percentPos - 0.75) / 0.25;
+			red = Math.round(255 + (255 - 255) * t);
+			green = Math.round(153 + (122 - 153) * t);
+			blue = Math.round(102 + (126 - 102) * t);
+		}
+
+		const dotColor = `rgb(${red}, ${green}, ${blue})`;
+
+		// Main Dot Body
+		ctx.beginPath();
+		ctx.arc(x, y, dotRadius, 0, 2 * Math.PI);
+		ctx.fillStyle = dotColor;
 		ctx.fill();
+
+		// White Border (Cutout effect)
+		ctx.lineWidth = 2;
+		ctx.strokeStyle = "white";
+		ctx.stroke();
+
+		// Subtle Drop Shadow (Optional, keeping it very light)
+		// ctx.shadowBlur = 4;
+		// ctx.shadowColor = "rgba(0,0,0,0.1)";
+		// ctx.stroke();
+		// ctx.shadowBlur = 0;
 	}
 }
 
@@ -190,7 +253,9 @@ function createRoom() {
 			guessTime: guessTimeLimit,
 		},
 	});
-	setDynamicText("connection-status", "roomCreatedWithId", { roomId: currentRoomId });
+	setDynamicText("connection-status", "roomCreatedWithId", {
+		roomId: currentRoomId,
+	});
 	startListening();
 	setDynamicText("game-step", "waitingForPlayers");
 
@@ -343,7 +408,7 @@ function submitGuess(countdown = false) {
 	}
 
 	document.getElementById("guess-section").style.display = "none";
-	document.getElementById("game-step").innerText = "";
+	clearDynamicText("game-step");
 
 	database.ref("rooms/" + currentRoomId).update({
 		guessResult: {
@@ -360,7 +425,9 @@ function submitGuess(countdown = false) {
 	});
 
 	if (countdown) {
-		alert(t("timeoutGuess", { value: document.getElementById("guessSlider").value }));
+		alert(
+			t("timeoutGuess", { value: document.getElementById("guessSlider").value })
+		);
 	}
 }
 
@@ -500,11 +567,10 @@ function startListening() {
 			if (playerRole !== data.currentTurn) {
 				const hintElem = document.getElementById("hint");
 				const guessSection = document.getElementById("guess-section");
-				const gameStep = document.getElementById("game-step");
 
 				if (hintElem) hintElem.innerText = data.currentHint;
 				if (guessSection) guessSection.style.display = "block";
-				if (gameStep) gameStep.innerText = "";
+				clearDynamicText("game-step");
 
 				startCountdown(data.phaseStartTime, guessTimeLimit);
 			}
@@ -513,13 +579,12 @@ function startListening() {
 		if (data.gameState === "resultPhase") {
 			const resultElem = document.getElementById("result");
 			const nextRoundBtn = document.getElementById("nextRoundBtn");
-			const gameStep = document.getElementById("game-step");
 
 			if (resultElem) resultElem.innerText = data.guessResult.feedback;
 			if (currentTurn !== playerRole) {
 				if (nextRoundBtn) nextRoundBtn.style.display = "block";
 			} else {
-				if (gameStep) gameStep.innerText = "";
+				clearDynamicText("game-step");
 			}
 		}
 
